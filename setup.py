@@ -15,21 +15,25 @@ from distutils.filelist import FileList
 from distutils.util import subst_vars, change_root
 from distutils.command.build_py import build_py as _build_py
 from distutils.command.sdist import sdist as _sdist
+from sphinx.setup_command import BuildDoc as SphinxBuildDoc
 
+name = 'python-nss'
 version = "1.0.1"
+release = version
 
 doc_manifest = [
     [['include README LICENSE* doc/ChangeLog',
       'recursive-include doc *.py *.txt',
-      'prune doc/examples/pki'],
+      'prune doc/examples/pki',
+      'prune doc/sphinx'],
      [('^doc/', '')], None],
     [['recursive-include test run_tests setup_certs.py test_*.py util.py *.txt',
       'prune test/pki'],
      None , None],
     [['recursive-include lib *.py *.txt',],
      [('^lib/', '')] , 'examples'],
-    [['recursive-include build/doc/html *'],
-     [('^build/doc/', 'api/')], None],
+    [['recursive-include build/sphinx/html *'],
+     [('^build/sphinx/', 'api/')], None],
 ]
 
 def update_version():
@@ -114,13 +118,13 @@ class BuildDoc(Command):
     user_options = [('docdir=', 'd', "directory root for documentation"),
                    ]
 
-    def has_epydoc (self):
-        if find_executable('epydoc'):
+    def has_sphinx (self):
+        if find_executable('sphinx-build'):
             return True
         else:
             return False
 
-    sub_commands = [('build_api_doc', has_epydoc),
+    sub_commands = [('build_sphinx', has_sphinx),
                    ]
 
     def initialize_options(self):
@@ -137,46 +141,15 @@ class BuildDoc(Command):
 
     def run(self):
         self.run_command('build')
+        # Add build directory to Python path so doc builder can import
+        # in-tree built modules
+        sys.path.insert(0, self.build_lib)
         for cmd_name in self.get_sub_commands():
             self.run_command(cmd_name)
+        # Remove the build directory from Python path
+        del sys.path[0]
 
 
-class BuildApiDoc(Command):
-    description = 'generate the API documentation'
-    user_options = [('docdir=',  'd', "directory root for documentation"),
-                    ('action=',  'a', "epydoc action (html, latex, dvi, ps, pdf, check, pickle"),
-                    ('htmldir',  'H', "directory to locate the API HTML files under"),
-                   ]
-
-    def initialize_options(self):
-        self.build_base = None
-        self.build_lib = None
-        self.docdir = None
-        self.action = None
-        self.htmldir = None
-
-    def finalize_options(self):
-        self.set_undefined_options('build',
-                                   ('build_base', 'build_base'),
-                                   ('build_lib', 'build_lib'))
-
-        if self.action is None:
-            self.action = 'html'
-
-        if self.docdir is None:
-            if self.action == 'html':
-                self.docdir = change_root(self.get_finalized_command('build_doc').docdir, 'html')
-            else:
-                self.docdir = self.get_finalized_command('build_doc').docdir
-
-    def run(self):
-        prog = find_executable('epydoc')
-        pkg_dirs = [change_root(self.build_lib, pkg) for pkg in self.distribution.packages]
-        cmd = [prog, '-v', '--%s' % self.action, '--docformat', 'restructuredtext', '-o', self.docdir]
-        #if self.verbose: cmd.append('-v')
-        cmd.extend(pkg_dirs)
-        self.mkpath(self.docdir)
-        spawn(cmd)
 
 class InstallDoc(Command):
     description = 'install documentation'
@@ -373,7 +346,7 @@ def main(argv):
 
           #bug_tracker       = 'https://bugzilla.redhat.com/buglist.cgi?submit&component=python-nss&product=Fedora&classification=Fedora'
           #bug_enter     = 'https://bugzilla.redhat.com/enter_bug.cgi?component=python-nss&product=Fedora&classification=Fedora',
-    setup(name             = 'python-nss',
+    setup(name             = name,
           version          = version,
           description      = 'Python bindings for Network Security Services (NSS) and Netscape Portable Runtime (NSPR)',
           long_description = long_description,
@@ -393,12 +366,17 @@ def main(argv):
           package_dir      = {'nss':'src'},
           packages         = ['nss'],
           cmdclass         = {'build_doc'     : BuildDoc,
-                              'build_api_doc' : BuildApiDoc,
+                              'build_sphinx'  : SphinxBuildDoc,
                               'install_doc'   : InstallDoc,
                               'build_py'      : BuildPy,
                               'sdist'         : SDist,
                              },
-
+          command_options={
+              'build_sphinx': {
+                  'project': ('setup.py', name),
+                  'version': ('setup.py', version),
+                  'release': ('setup.py', release),
+                  'source_dir': ('setup.py', 'doc/sphinx/source')}},
     )
 
     return 0

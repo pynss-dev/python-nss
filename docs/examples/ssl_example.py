@@ -1,27 +1,27 @@
-from __future__ import absolute_import
-from __future__ import print_function
+from __future__ import absolute_import, print_function
+
+import warnings
 
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import warnings
-warnings.simplefilter( "always", DeprecationWarning)
+warnings.simplefilter("always", DeprecationWarning)
 
 import argparse
 import getpass
 import os
 import sys
 
-from nss.error import NSPRError
 import nss.io as io
 import nss.nss as nss
 import nss.ssl as ssl
+from nss.error import NSPRError
 
 # -----------------------------------------------------------------------------
-NO_CLIENT_CERT             = 0
-REQUEST_CLIENT_CERT_ONCE   = 1
-REQUIRE_CLIENT_CERT_ONCE   = 2
+NO_CLIENT_CERT = 0
+REQUEST_CLIENT_CERT_ONCE = 1
+REQUIRE_CLIENT_CERT_ONCE = 2
 REQUEST_CLIENT_CERT_ALWAYS = 3
 REQUIRE_CLIENT_CERT_ALWAYS = 4
 
@@ -36,9 +36,12 @@ timeout_secs = 3
 # Callback Functions
 # -----------------------------------------------------------------------------
 
+
 def password_callback(slot, retry, password):
-    if password: return password
-    return getpass.getpass("Enter password: ");
+    if password:
+        return password
+    return getpass.getpass("Enter password: ")
+
 
 def handshake_callback(sock):
     print("-- handshake complete --")
@@ -49,8 +52,11 @@ def handshake_callback(sock):
     print("-- handshake complete --")
     print()
 
+
 def auth_certificate_callback(sock, check_sig, is_server, certdb):
-    print("auth_certificate_callback: check_sig=%s is_server=%s" % (check_sig, is_server))
+    print(
+        "auth_certificate_callback: check_sig=%s is_server=%s" % (check_sig, is_server)
+    )
     cert_is_valid = False
 
     cert = sock.get_peer_certificate()
@@ -98,7 +104,10 @@ def auth_certificate_callback(sock, check_sig, is_server, certdb):
     # man-in-the-middle attacks.
 
     hostname = sock.get_hostname()
-    print("verifying socket hostname (%s) matches cert subject (%s)" % (hostname, cert.subject))
+    print(
+        "verifying socket hostname (%s) matches cert subject (%s)"
+        % (hostname, cert.subject)
+    )
     try:
         # If the cert fails validation it will raise an exception
         cert_is_valid = cert.verify_hostname(hostname)
@@ -110,6 +119,7 @@ def auth_certificate_callback(sock, check_sig, is_server, certdb):
 
     print("Returning cert_is_valid = %s" % cert_is_valid)
     return cert_is_valid
+
 
 def client_auth_data_callback(ca_names, chosen_nickname, password, certdb):
     cert = None
@@ -136,9 +146,11 @@ def client_auth_data_callback(ca_names, chosen_nickname, password, certdb):
                 print(e)
         return False
 
+
 # -----------------------------------------------------------------------------
 # Client Implementation
 # -----------------------------------------------------------------------------
+
 
 def Client():
     valid_addr = False
@@ -167,12 +179,17 @@ def Client():
             sock.set_handshake_callback(handshake_callback)
 
             # Provide a callback to supply our client certificate info
-            sock.set_client_auth_data_callback(client_auth_data_callback, options.client_nickname,
-                                               options.password, nss.get_default_certdb())
+            sock.set_client_auth_data_callback(
+                client_auth_data_callback,
+                options.client_nickname,
+                options.password,
+                nss.get_default_certdb(),
+            )
 
             # Provide a callback to verify the servers certificate
-            sock.set_auth_certificate_callback(auth_certificate_callback,
-                                               nss.get_default_certdb())
+            sock.set_auth_certificate_callback(
+                auth_certificate_callback, nss.get_default_certdb()
+            )
         else:
             sock = io.Socket(net_addr.family)
 
@@ -187,13 +204,15 @@ def Client():
             print("client connection to: %s failed (%s)" % (net_addr, e))
 
     if not valid_addr:
-        print("Could not establish valid address for \"%s\" in family %s" % \
-        (options.hostname, io.addr_family_name(options.family)))
+        print(
+            "Could not establish valid address for \"%s\" in family %s"
+            % (options.hostname, io.addr_family_name(options.family))
+        )
         return
 
     # Talk to the server
     try:
-        data = 'Hello' + '\n' # newline is protocol record separator
+        data = 'Hello' + '\n'  # newline is protocol record separator
         sock.send(data.encode('utf-8'))
         buf = sock.readline()
         if not buf:
@@ -201,7 +220,7 @@ def Client():
             sock.close()
             return
         buf = buf.decode('utf-8')
-        buf = buf.rstrip()        # remove newline record separator
+        buf = buf.rstrip()  # remove newline record separator
         print("client received: %s" % (buf))
     except Exception as e:
         print(e.strerror)
@@ -225,9 +244,11 @@ def Client():
     except Exception as e:
         print(e)
 
+
 # -----------------------------------------------------------------------------
 # Server Implementation
 # -----------------------------------------------------------------------------
+
 
 def Server():
     # Setup an IP Address to listen on any of our interfaces
@@ -241,9 +262,11 @@ def Server():
         ssl.config_server_session_id_cache()
 
         # Get our certificate and private key
-        server_cert = nss.find_cert_from_nickname(options.server_nickname, options.password)
+        server_cert = nss.find_cert_from_nickname(
+            options.server_nickname, options.password
+        )
         priv_key = nss.find_key_by_any_cert(server_cert, options.password)
-        server_cert_kea = server_cert.find_kea_type();
+        server_cert_kea = server_cert.find_kea_type()
 
         print("server cert:\n%s" % server_cert)
 
@@ -259,7 +282,9 @@ def Server():
             sock.set_ssl_option(ssl.SSL_REQUEST_CERTIFICATE, True)
         if options.client_cert_action == REQUIRE_CLIENT_CERT_ONCE:
             sock.set_ssl_option(ssl.SSL_REQUIRE_CERTIFICATE, True)
-        sock.set_auth_certificate_callback(auth_certificate_callback, nss.get_default_certdb())
+        sock.set_auth_certificate_callback(
+            auth_certificate_callback, nss.get_default_certdb()
+        )
 
         # Configure the server SSL socket
         sock.config_secure_server(server_cert, priv_key, server_cert_kea)
@@ -289,10 +314,10 @@ def Server():
                     break
 
                 buf = buf.decode('utf-8')
-                buf = buf.rstrip()                 # remove newline record separator
+                buf = buf.rstrip()  # remove newline record separator
                 print("server received: %s" % (buf))
 
-                data ='Goodbye' + '\n' # newline is protocol record separator
+                data = 'Goodbye' + '\n'  # newline is protocol record separator
                 client_sock.send(data.encode('utf-8'))
                 try:
                     client_sock.shutdown(io.PR_SHUTDOWN_RCV)
@@ -314,7 +339,9 @@ def Server():
         print(e)
         pass
 
+
 # -----------------------------------------------------------------------------
+
 
 class FamilyArgAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
@@ -329,24 +356,25 @@ class FamilyArgAction(argparse.Action):
             raise argparse.ArgumentError(self, "unknown address family (%s)" % (value))
         setattr(namespace, self.dest, family)
 
+
 parser = argparse.ArgumentParser(description='SSL example')
 
-parser.add_argument('-C', '--client', action='store_true',
-                    help='run as the client')
+parser.add_argument('-C', '--client', action='store_true', help='run as the client')
 
-parser.add_argument('-S', '--server', action='store_true',
-                    help='run as the server')
+parser.add_argument('-S', '--server', action='store_true', help='run as the server')
 
-parser.add_argument('-d', '--db-name',
-                    help='NSS database name (e.g. "sql:pki")')
+parser.add_argument('-d', '--db-name', help='NSS database name (e.g. "sql:pki")')
 
-parser.add_argument('-H', '--hostname',
-                    help='host to connect to')
+parser.add_argument('-H', '--hostname', help='host to connect to')
 
-parser.add_argument('-f', '--family',
-                    choices=['unspec', 'inet', 'inet6'],
-                    dest='family', action=FamilyArgAction, nargs=1,
-                    help='''
+parser.add_argument(
+    '-f',
+    '--family',
+    choices=['unspec', 'inet', 'inet6'],
+    dest='family',
+    action=FamilyArgAction,
+    nargs=1,
+    help="""
                       If unspec client tries all addresses returned by AddrInfo,
                       server binds to IPv4 "any" wildcard address.
 
@@ -354,64 +382,92 @@ parser.add_argument('-f', '--family',
                       server binds to IPv4 "any" wildcard address.
 
                       If inet6 client tries IPv6 addresses returned by AddrInfo,
-                      server binds to IPv6 "any" wildcard address''')
+                      server binds to IPv6 "any" wildcard address""",
+)
 
-parser.add_argument('-4', '--inet',
-                    dest='family', action='store_const', const=io.PR_AF_INET,
-                    help='set family to inet (see family)')
+parser.add_argument(
+    '-4',
+    '--inet',
+    dest='family',
+    action='store_const',
+    const=io.PR_AF_INET,
+    help='set family to inet (see family)',
+)
 
-parser.add_argument('-6', '--inet6',
-                    dest='family', action='store_const', const=io.PR_AF_INET6,
-                    help='set family to inet6 (see family)')
+parser.add_argument(
+    '-6',
+    '--inet6',
+    dest='family',
+    action='store_const',
+    const=io.PR_AF_INET6,
+    help='set family to inet6 (see family)',
+)
 
-parser.add_argument('-n', '--server-nickname',
-                    help='server certificate nickname')
+parser.add_argument('-n', '--server-nickname', help='server certificate nickname')
 
-parser.add_argument('-N', '--client-nickname',
-                    help='client certificate nickname')
+parser.add_argument('-N', '--client-nickname', help='client certificate nickname')
 
-parser.add_argument('-w', '--password',
-                    help='certificate database password')
+parser.add_argument('-w', '--password', help='certificate database password')
 
-parser.add_argument('-p', '--port', type=int,
-                    help='host port')
+parser.add_argument('-p', '--port', type=int, help='host port')
 
-parser.add_argument('-e', '--encrypt', dest='use_ssl', action='store_true',
-                    help='use SSL connection')
+parser.add_argument(
+    '-e', '--encrypt', dest='use_ssl', action='store_true', help='use SSL connection'
+)
 
-parser.add_argument('-E', '--no-encrypt', dest='use_ssl', action='store_false',
-                    help='do not use SSL connection')
+parser.add_argument(
+    '-E',
+    '--no-encrypt',
+    dest='use_ssl',
+    action='store_false',
+    help='do not use SSL connection',
+)
 
-parser.add_argument('--require-cert-once', dest='client_cert_action',
-                    action='store_const', const=REQUIRE_CLIENT_CERT_ONCE)
+parser.add_argument(
+    '--require-cert-once',
+    dest='client_cert_action',
+    action='store_const',
+    const=REQUIRE_CLIENT_CERT_ONCE,
+)
 
-parser.add_argument('--require-cert-always', dest='client_cert_action',
-                    action='store_const', const=REQUIRE_CLIENT_CERT_ALWAYS)
+parser.add_argument(
+    '--require-cert-always',
+    dest='client_cert_action',
+    action='store_const',
+    const=REQUIRE_CLIENT_CERT_ALWAYS,
+)
 
-parser.add_argument('--request-cert-once', dest='client_cert_action',
-                    action='store_const', const=REQUEST_CLIENT_CERT_ONCE)
+parser.add_argument(
+    '--request-cert-once',
+    dest='client_cert_action',
+    action='store_const',
+    const=REQUEST_CLIENT_CERT_ONCE,
+)
 
-parser.add_argument('--request-cert-always', dest='client_cert_action',
-                    action='store_const', const=REQUEST_CLIENT_CERT_ALWAYS)
+parser.add_argument(
+    '--request-cert-always',
+    dest='client_cert_action',
+    action='store_const',
+    const=REQUEST_CLIENT_CERT_ALWAYS,
+)
 
-parser.add_argument('--min-ssl-version',
-                    help='minimum SSL version')
+parser.add_argument('--min-ssl-version', help='minimum SSL version')
 
-parser.add_argument('--max-ssl-version',
-                    help='minimum SSL version')
+parser.add_argument('--max-ssl-version', help='minimum SSL version')
 
-parser.set_defaults(client = False,
-                    server = False,
-                    db_name = 'sql:pki',
-                    hostname = os.uname()[1],
-                    family = io.PR_AF_UNSPEC,
-                    server_nickname = 'test_server',
-                    client_nickname = 'test_user',
-                    password = 'DB_passwd',
-                    port = 1234,
-                    use_ssl = True,
-                    client_cert_action = NO_CLIENT_CERT,
-                   )
+parser.set_defaults(
+    client=False,
+    server=False,
+    db_name='sql:pki',
+    hostname=os.uname()[1],
+    family=io.PR_AF_UNSPEC,
+    server_nickname='test_server',
+    client_nickname='test_user',
+    password='DB_passwd',
+    port=1234,
+    use_ssl=True,
+    client_cert_action=NO_CLIENT_CERT,
+)
 
 options = parser.parse_args()
 
@@ -431,32 +487,38 @@ else:
 ssl.set_domestic_policy()
 nss.set_password_callback(password_callback)
 
-min_ssl_version, max_ssl_version = \
-    ssl.get_supported_ssl_version_range(repr_kind=nss.AsString)
-print("Supported SSL version range: min=%s, max=%s" % \
-    (min_ssl_version, max_ssl_version))
+min_ssl_version, max_ssl_version = ssl.get_supported_ssl_version_range(
+    repr_kind=nss.AsString
+)
+print(
+    "Supported SSL version range: min=%s, max=%s" % (min_ssl_version, max_ssl_version)
+)
 
-min_ssl_version, max_ssl_version = \
-    ssl.get_default_ssl_version_range(repr_kind=nss.AsString)
-print("Default SSL version range: min=%s, max=%s" % \
-    (min_ssl_version, max_ssl_version))
+min_ssl_version, max_ssl_version = ssl.get_default_ssl_version_range(
+    repr_kind=nss.AsString
+)
+print("Default SSL version range: min=%s, max=%s" % (min_ssl_version, max_ssl_version))
 
-if options.min_ssl_version is not None or \
-   options.max_ssl_version is not None:
+if options.min_ssl_version is not None or options.max_ssl_version is not None:
 
     if options.min_ssl_version is not None:
-        min_ssl_version  = options.min_ssl_version
+        min_ssl_version = options.min_ssl_version
     if options.max_ssl_version is not None:
-        max_ssl_version  = options.max_ssl_version
+        max_ssl_version = options.max_ssl_version
 
-    print("Setting default SSL version range: min=%s, max=%s" % \
-        (min_ssl_version, max_ssl_version))
+    print(
+        "Setting default SSL version range: min=%s, max=%s"
+        % (min_ssl_version, max_ssl_version)
+    )
     ssl.set_default_ssl_version_range(min_ssl_version, max_ssl_version)
 
-    min_ssl_version, max_ssl_version = \
-        ssl.get_default_ssl_version_range(repr_kind=nss.AsString)
-    print("Default SSL version range now: min=%s, max=%s" % \
-        (min_ssl_version, max_ssl_version))
+    min_ssl_version, max_ssl_version = ssl.get_default_ssl_version_range(
+        repr_kind=nss.AsString
+    )
+    print(
+        "Default SSL version range now: min=%s, max=%s"
+        % (min_ssl_version, max_ssl_version)
+    )
 
 # Run as a client or as a serveri
 if options.client:

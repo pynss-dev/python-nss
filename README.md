@@ -15,26 +15,32 @@ More information on python-nss can be found on the
 
 For information on NSS and NSPR, see the following:
 
-    * Network Security Services. `NSS project page <http://www.mozilla.org/projects/security/pki/nss/>`_.
-    * Netscape Portable Runtime. `NSPR project page <http://www.mozilla.org/projects/nspr/>`_.
+* Network Security Services. `NSS project page <http://www.mozilla.org/projects/security/pki/nss/>`_.
+* Netscape Portable Runtime. `NSPR project page <http://www.mozilla.org/projects/nspr/>`_.
 
 To build python-nss you the C language header files and libraries for
 both NSPR and NSS will need to be installed. This is system and
 distribution specific, as such we cannot give you explicit
 instructions. On Linux typically these packages are called:
 
-    * nss-devel
-    * nspr-devel
+* nss-devel
+* nspr-devel
 
 Use your system package manger to install them, for example on Fedora:
 
-    % sudo yum install nss-devel nspr-devel
+```
+sudo yum install nss-devel nspr-devel
+```
 
 After all packages are installed, then:
 
-    % python setup.py build
-    % sudo python setup.py install
+```
+python setup.py build
+sudo python setup.py install
+```
 
 To generate the API documentation:
 
-    % python setup.py build_doc
+```
+python setup.py build_doc
+```

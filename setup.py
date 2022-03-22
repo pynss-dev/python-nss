@@ -2,44 +2,60 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import sys
 import os
 import re
 import subprocess
-import re
-
-from distutils.core import setup, Extension, Command
-from distutils.spawn import find_executable, spawn
+import sys
 from distutils import log
-from distutils.filelist import FileList
-from distutils.util import subst_vars, change_root
 from distutils.command.build_py import build_py as _build_py
 from distutils.command.sdist import sdist as _sdist
+from distutils.core import Command, Extension, setup
+from distutils.filelist import FileList
+from distutils.spawn import find_executable, spawn
+from distutils.util import change_root, subst_vars
+
 from sphinx.setup_command import BuildDoc as SphinxBuildDoc
 
 name = 'python-nss'
-version = "1.0.1"
+version = '1.0.2'
 release = version
 
 doc_manifest = [
-    [['include README LICENSE* doc/ChangeLog',
-      'recursive-include doc *.py *.txt',
-      'prune doc/examples/pki',
-      'prune doc/sphinx'],
-     [('^doc/', '')], None],
-    [['recursive-include test run_tests setup_certs.py test_*.py util.py *.txt',
-      'prune test/pki'],
-     None , None],
-    [['recursive-include lib *.py *.txt',],
-     [('^lib/', '')] , 'examples'],
-    [['recursive-include build/sphinx/html *'],
-     [('^build/sphinx/', 'api/')], None],
+    [
+        [
+            'include README.md LICENSE* docs/ChangeLog',
+            'recursive-include doc *.py *.txt',
+            'prune docs/examples/pki',
+            'prune docs/sphinx',
+        ],
+        [('^docs/', '')],
+        None,
+    ],
+    [
+        [
+            'recursive-include test run_tests setup_certs.py test_*.py util.py *.txt',
+            'prune test/pki',
+        ],
+        None,
+        None,
+    ],
+    [
+        [
+            'recursive-include lib *.py *.txt',
+        ],
+        [('^lib/', '')],
+        'examples',
+    ],
+    [['recursive-include build/sphinx/html *'], [('^build/sphinx/', 'api/')], None],
 ]
 
+
 def update_version():
-    """If the version string in __init__.py doesn't match the current
+    """
+    If the version string in __init__.py doesn't match the current
     version then edit the file replacing the version string
-    with the current version."""
+    with the current version.
+    """
 
     version_file = 'src/__init__.py'
     tmp_file = 'src/__init__.tmp'
@@ -68,15 +84,16 @@ def update_version():
     else:
         os.unlink(tmp_file)
 
+
 def find_include_dir(dir_names, include_files, include_roots=None):
-    '''
+    """
     Locate an include directory on the system which contains the specified include files.
     You must provide a list of directory basenames to search. You may optionally provide
     a list of include roots. The search proceeds by iterating over each root and appending
     each directory basename to it. If the resulting directory path contains all the include
     files that directory is returned. If no directory is found containing all the include
     files a ValueError is raised.
-    '''
+    """
     if not include_roots:
         include_roots = ['/usr/include', '/usr/local/include']
     if len(dir_names) == 0:
@@ -95,7 +112,10 @@ def find_include_dir(dir_names, include_files, include_roots=None):
                         break
                 if found:
                     return include_dir
-    raise ValueError("unable to locate include directory containing header files %s" % include_files)
+    raise ValueError(
+        "unable to locate include directory containing header files %s" % include_files
+    )
+
 
 class BuildPy(_build_py):
     """Specialized Python source builder."""
@@ -115,17 +135,19 @@ class SDist(_sdist):
 
 class BuildDoc(Command):
     description = 'generate documentation'
-    user_options = [('docdir=', 'd', "directory root for documentation"),
-                   ]
+    user_options = [
+        ('docdir=', 'd', "directory root for documentation"),
+    ]
 
-    def has_sphinx (self):
+    def has_sphinx(self):
         if find_executable('sphinx-build'):
             return True
         else:
             return False
 
-    sub_commands = [('build_sphinx', has_sphinx),
-                   ]
+    sub_commands = [
+        ('build_sphinx', has_sphinx),
+    ]
 
     def initialize_options(self):
         self.build_base = None
@@ -133,11 +155,11 @@ class BuildDoc(Command):
         self.docdir = None
 
     def finalize_options(self):
-        self.set_undefined_options('build',
-                                   ('build_base', 'build_base'),
-                                   ('build_lib', 'build_lib'))
+        self.set_undefined_options(
+            'build', ('build_base', 'build_base'), ('build_lib', 'build_lib')
+        )
         if self.docdir is None:
-            self.docdir = change_root(self.build_base, 'doc')
+            self.docdir = change_root(self.build_base, 'docs')
 
     def run(self):
         self.run_command('build')
@@ -150,15 +172,13 @@ class BuildDoc(Command):
         del sys.path[0]
 
 
-
 class InstallDoc(Command):
     description = 'install documentation'
-    user_options = [('docdir=', 'd', "directory root for documentation"),
-                    ('root=', None,
-                     "install everything relative to this alternate root directory"),
-                    ('skip-build', None,
-                     "skip rebuilding everything (for testing/debugging)"),
-                   ]
+    user_options = [
+        ('docdir=', 'd', "directory root for documentation"),
+        ('root=', None, "install everything relative to this alternate root directory"),
+        ('skip-build', None, "skip rebuilding everything (for testing/debugging)"),
+    ]
 
     def initialize_options(self):
         self.root = None
@@ -167,25 +187,24 @@ class InstallDoc(Command):
         self.skip_build = False
 
     def finalize_options(self):
-        self.set_undefined_options('install',
-                                   ('root', 'root'))
-        self.set_undefined_options('build',
-                                   ('build_base', 'build_base'))
+        self.set_undefined_options('install', ('root', 'root'))
+        self.set_undefined_options('build', ('build_base', 'build_base'))
 
         if self.docdir is None:
-            self.docdir = change_root(self.build_base, 'doc')
+            self.docdir = change_root(self.build_base, 'docs')
 
     def run(self):
         if not self.skip_build:
             self.run_command('build_doc')
 
-
         dst_root = change_root(self.root, self.docdir)
-        self.copy_transformed_tree(doc_manifest,
-                                   dst_root=dst_root,
-                                   substitutions={'docdir' : self.docdir})
+        self.copy_transformed_tree(
+            doc_manifest, dst_root=dst_root, substitutions={'docdir': self.docdir}
+        )
 
-    def copy_transformed_tree(self, install_specs, dst_root=None, src_root=None, substitutions={}):
+    def copy_transformed_tree(
+        self, install_specs, dst_root=None, src_root=None, substitutions={}
+    ):
         """
         Copy parts of a source tree to a destination tree with a
         different tree structure and/or names.
@@ -238,15 +257,16 @@ class InstallDoc(Command):
 
             copy_transformed_tree([[["include build/doc *.txt"], None, 'doc']])
 
-        Copy all html files found under build to doc/html and change the extension from
+        Copy all html files found under build to docs/html and change the extension from
         .html to .htm
 
             copy_transformed_tree([[["include build *.html"], [('\.html$','.htm')], 'doc']])
 
-    """
-
-        if src_root is not None: src_root = subst_vars(src_root, substitutions)
-        if dst_root is not None: dst_root = subst_vars(dst_root, substitutions)
+        """
+        if src_root is not None:
+            src_root = subst_vars(src_root, substitutions)
+        if dst_root is not None:
+            dst_root = subst_vars(dst_root, substitutions)
 
         filelist = FileList()
         if src_root is None:
@@ -255,9 +275,10 @@ class InstallDoc(Command):
             filelist.findall(src_root)
 
         for manifest_template, dst_xforms, dst_dir in install_specs:
-            if dst_dir is not None: dst_dir = subst_vars(dst_dir, substitutions)
+            if dst_dir is not None:
+                dst_dir = subst_vars(dst_dir, substitutions)
 
-            filelist.files = [] # reinitialize to empty
+            filelist.files = []  # reinitialize to empty
 
             for line in manifest_template:
                 filelist.process_template_line(subst_vars(line, substitutions))
@@ -278,12 +299,9 @@ class InstallDoc(Command):
                 self.copy_file(src_path, full_dst_path)
 
 
-
-#------------------------------------------------------------------------------
-
 def main(argv):
 
-    with open('README') as f:
+    with open('README.md') as f:
         long_description = f.read()
 
     debug_compile_args = ['-O0', '-g']
@@ -291,7 +309,7 @@ def main(argv):
     include_roots = []
 
     for arg in argv[:]:
-        if arg in ('--debug', ):
+        if arg in ('--debug',):
             print("compiling with debug")
             extra_compile_args += debug_compile_args
             argv.remove(arg)
@@ -303,85 +321,103 @@ def main(argv):
             include_roots.append(arg.split('--include-root=')[1])
             argv.remove(arg)
 
-    nss_include_dir  = find_include_dir(['nss3', 'nss'],   ['nss.h',  'pk11pub.h'], include_roots=include_roots)
-    nspr_include_dir = find_include_dir(['nspr4', 'nspr'], ['nspr.h', 'prio.h'], include_roots=include_roots)
+    nss_include_dir = find_include_dir(
+        ['nss3', 'nss'], ['nss.h', 'pk11pub.h'], include_roots=include_roots
+    )
+    nspr_include_dir = find_include_dir(
+        ['nspr4', 'nspr'], ['nspr.h', 'prio.h'], include_roots=include_roots
+    )
 
-    nss_error_extension = \
-        Extension('nss.error',
-                  sources            = ['src/py_nspr_error.c'],
-                  include_dirs       = [nss_include_dir, nspr_include_dir],
-                  depends            = ['src/py_nspr_common.h', 'src/py_nspr_error.h',
-                                         'src/NSPRerrs.h', 'src/SSLerrs.h', 'src/SECerrs.h'],
-                  libraries          = ['nspr4'],
-                  extra_compile_args = extra_compile_args,
-                  )
+    nss_error_extension = Extension(
+        'nss.error',
+        sources=['src/py_nspr_error.c'],
+        include_dirs=[nss_include_dir, nspr_include_dir],
+        depends=[
+            'src/py_nspr_common.h',
+            'src/py_nspr_error.h',
+            'src/NSPRerrs.h',
+            'src/SSLerrs.h',
+            'src/SECerrs.h',
+        ],
+        libraries=['nspr4'],
+        extra_compile_args=extra_compile_args,
+    )
 
-    nss_io_extension = \
-        Extension('nss.io',
-                  sources            = ['src/py_nspr_io.c'],
-                  include_dirs       = [nss_include_dir, nspr_include_dir],
-                  depends            = ['src/py_nspr_common.h', 'src/py_nspr_error.h', 'src/py_nspr_io.h'],
-                  libraries          = ['nspr4'],
-                  extra_compile_args = extra_compile_args,
-                  )
+    nss_io_extension = Extension(
+        'nss.io',
+        sources=['src/py_nspr_io.c'],
+        include_dirs=[nss_include_dir, nspr_include_dir],
+        depends=['src/py_nspr_common.h', 'src/py_nspr_error.h', 'src/py_nspr_io.h'],
+        libraries=['nspr4'],
+        extra_compile_args=extra_compile_args,
+    )
 
-    nss_nss_extension = \
-        Extension('nss.nss',
-                  sources            = ['src/py_nss.c'],
-                  include_dirs       = ['src', nss_include_dir, nspr_include_dir],
-                  depends            = ['src/py_nspr_common.h', 'src/py_nspr_error.h', 'src/py_nss.h'],
-                  libraries          = ['nspr4', 'ssl3', 'nss3', 'smime3'],
-                  extra_compile_args = extra_compile_args,
-                  )
+    nss_nss_extension = Extension(
+        'nss.nss',
+        sources=['src/py_nss.c'],
+        include_dirs=['src', nss_include_dir, nspr_include_dir],
+        depends=['src/py_nspr_common.h', 'src/py_nspr_error.h', 'src/py_nss.h'],
+        libraries=['nspr4', 'ssl3', 'nss3', 'smime3'],
+        extra_compile_args=extra_compile_args,
+    )
 
-    nss_ssl_extension = \
-        Extension('nss.ssl',
-                  sources            = ['src/py_ssl.c'],
-                  include_dirs       = ['src', nss_include_dir, nspr_include_dir],
-                  depends            = ['src/py_nspr_common.h', 'src/py_nspr_error.h', 'src/py_nspr_io.h',
-                                        'src/py_ssl.h', 'src/py_nss.h'],
-                  libraries          = ['nspr4', 'ssl3'],
-                  extra_compile_args = extra_compile_args,
-                  )
+    nss_ssl_extension = Extension(
+        'nss.ssl',
+        sources=['src/py_ssl.c'],
+        include_dirs=['src', nss_include_dir, nspr_include_dir],
+        depends=[
+            'src/py_nspr_common.h',
+            'src/py_nspr_error.h',
+            'src/py_nspr_io.h',
+            'src/py_ssl.h',
+            'src/py_nss.h',
+        ],
+        libraries=['nspr4', 'ssl3'],
+        extra_compile_args=extra_compile_args,
+    )
 
-          #bug_tracker       = 'https://bugzilla.redhat.com/buglist.cgi?submit&component=python-nss&product=Fedora&classification=Fedora'
-          #bug_enter     = 'https://bugzilla.redhat.com/enter_bug.cgi?component=python-nss&product=Fedora&classification=Fedora',
-    setup(name             = name,
-          version          = version,
-          description      = 'Python bindings for Network Security Services (NSS) and Netscape Portable Runtime (NSPR)',
-          long_description = long_description,
-          author           = 'John Dennis',
-          author_email     = 'jdennis@redhat.com',
-          maintainer       = 'John Dennis',
-          maintainer_email = 'jdennis@redhat.com',
-          license          = 'MPLv2.0 or GPLv2+ or LGPLv2+',
-          platforms        = 'posix',
-          url              = 'http://www.mozilla.org/projects/security/pki/python-nss',
-          download_url     = '',
-          ext_modules      = [nss_error_extension,
-                              nss_io_extension,
-                              nss_nss_extension,
-                              nss_ssl_extension,
-                             ],
-          package_dir      = {'nss':'src'},
-          packages         = ['nss'],
-          cmdclass         = {'build_doc'     : BuildDoc,
-                              'build_sphinx'  : SphinxBuildDoc,
-                              'install_doc'   : InstallDoc,
-                              'build_py'      : BuildPy,
-                              'sdist'         : SDist,
-                             },
-          command_options={
-              'build_sphinx': {
-                  'project': ('setup.py', name),
-                  'version': ('setup.py', version),
-                  'release': ('setup.py', release),
-                  'source_dir': ('setup.py', 'doc/sphinx/source')}},
+    # bug_tracker = 'https://bugzilla.redhat.com/buglist.cgi?submit&component=python-nss&product=Fedora&classification=Fedora'
+    # bug_enter = 'https://bugzilla.redhat.com/enter_bug.cgi?component=python-nss&product=Fedora&classification=Fedora',
+    setup(
+        name=name,
+        version=version,
+        description='Python bindings for Network Security Services (NSS) and Netscape Portable Runtime (NSPR)',
+        long_description=long_description,
+        author='John Dennis',
+        author_email='jdennis@redhat.com',
+        maintainer='John Dennis',
+        maintainer_email='jdennis@redhat.com',
+        license='MPLv2.0 or GPLv2+ or LGPLv2+',
+        platforms='posix',
+        url='http://www.mozilla.org/projects/security/pki/python-nss',
+        download_url='',
+        ext_modules=[
+            nss_error_extension,
+            nss_io_extension,
+            nss_nss_extension,
+            nss_ssl_extension,
+        ],
+        package_dir={'nss': 'src'},
+        packages=['nss'],
+        cmdclass={
+            'build_doc': BuildDoc,
+            'build_sphinx': SphinxBuildDoc,
+            'install_doc': InstallDoc,
+            'build_py': BuildPy,
+            'sdist': SDist,
+        },
+        command_options={
+            'build_sphinx': {
+                'project': ('setup.py', name),
+                'version': ('setup.py', version),
+                'release': ('setup.py', release),
+                'source_dir': ('setup.py', 'docs/sphinx/source'),
+            }
+        },
     )
 
     return 0
 
-#------------------------------------------------------------------------------
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv))

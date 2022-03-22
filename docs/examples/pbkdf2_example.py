@@ -1,29 +1,31 @@
-from __future__ import absolute_import
-from __future__ import print_function
+from __future__ import absolute_import, print_function
 
 import argparse
 import sys
 
-import nss.nss as nss
 import nss.error as nss_error
+import nss.nss as nss
+
 print(sys.path)
 import six
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 
 options = None
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
+
 
 def fmt_info(label, item, level=0, hex_data=False):
-    fmt_tuples = nss.make_line_fmt_tuples(level, label+':')
+    fmt_tuples = nss.make_line_fmt_tuples(level, label + ':')
     if hex_data:
-        fmt_tuples.extend(nss.make_line_fmt_tuples(level+1,
-                                                   nss.data_to_hex(item, 16)))
+        fmt_tuples.extend(
+            nss.make_line_fmt_tuples(level + 1, nss.data_to_hex(item, 16))
+        )
     elif isinstance(item, six.string_types):
-        fmt_tuples.extend(nss.make_line_fmt_tuples(level+1, str(item)))
+        fmt_tuples.extend(nss.make_line_fmt_tuples(level + 1, str(item)))
     else:
-        fmt_tuples.extend(item.format_lines(level=level+1))
+        fmt_tuples.extend(item.format_lines(level=level + 1))
     return nss.indented_format(fmt_tuples)
 
 
@@ -37,17 +39,18 @@ def generate_key():
     # create_pbev2_algorithm_id() with no parameters.
     # The parameters are only specified here because this is
     # an example script people can play with.
-    alg_id = nss.create_pbev2_algorithm_id(options.pbe_alg,
-                                           options.cipher_alg,
-                                           options.prf_alg,
-                                           options.key_length,
-                                           options.iterations,
-                                           options.salt)
+    alg_id = nss.create_pbev2_algorithm_id(
+        options.pbe_alg,
+        options.cipher_alg,
+        options.prf_alg,
+        options.key_length,
+        options.iterations,
+        options.salt,
+    )
 
     if not options.quiet:
         print(fmt_info("create_pbev2_algorithm_id returned()", alg_id))
         print()
-
 
     # Pick a PK11 Slot to operate in, we'll use the internal slot
     slot = nss.get_internal_slot()
@@ -62,6 +65,7 @@ def generate_key():
         print()
 
     return alg_id, sym_key
+
 
 def get_encryption_context(alg_id, sym_key):
 
@@ -90,21 +94,28 @@ def get_encryption_context(alg_id, sym_key):
     params_base64 = params.to_base64(0)
 
     if not options.quiet:
-        print(fmt_info("get_pbe_crypto_mechanism (encrypting) returned mechanism:",
-                       nss.key_mechanism_type_name(mechanism)))
-        print(fmt_info("get_pbe_crypto_mechanism (encrypting) returned params:",
-                       params))
+        print(
+            fmt_info(
+                "get_pbe_crypto_mechanism (encrypting) returned mechanism:",
+                nss.key_mechanism_type_name(mechanism),
+            )
+        )
+        print(
+            fmt_info("get_pbe_crypto_mechanism (encrypting) returned params:", params)
+        )
         print()
 
     # Now we have enough information to create an encrypting context
     # and decrypting the data.
 
-    encrypt_ctx = nss.create_context_by_sym_key(mechanism, nss.CKA_ENCRYPT,
-                                                sym_key, params)
+    encrypt_ctx = nss.create_context_by_sym_key(
+        mechanism, nss.CKA_ENCRYPT, sym_key, params
+    )
 
     # Return the encrypting context and it's parameter block so that the
     # decryption context can use the same parameter block.
     return encrypt_ctx, params_base64
+
 
 def get_decryption_context(alg_id, sym_key, params_base64):
 
@@ -126,16 +137,22 @@ def get_decryption_context(alg_id, sym_key, params_base64):
     params = nss.SecItem(params_base64, ascii=True)
 
     if not options.quiet:
-        print(fmt_info("get_pbe_crypto_mechanism (decrypting) returned mechanism:",
-                       nss.key_mechanism_type_name(mechanism)))
+        print(
+            fmt_info(
+                "get_pbe_crypto_mechanism (decrypting) returned mechanism:",
+                nss.key_mechanism_type_name(mechanism),
+            )
+        )
         print()
 
     # Now we have enough information to create a decrypting context
 
-    decrypt_ctx = nss.create_context_by_sym_key(mechanism, nss.CKA_DECRYPT,
-                                                sym_key, params)
+    decrypt_ctx = nss.create_context_by_sym_key(
+        mechanism, nss.CKA_DECRYPT, sym_key, params
+    )
 
     return decrypt_ctx
+
 
 def do_pbkdf2():
 
@@ -170,49 +187,44 @@ def do_pbkdf2():
     print(fmt_info("Decoded Text", decoded_text))
     print()
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 def main():
     global options
 
     parser = argparse.ArgumentParser(description='Password Based Encryption Example')
 
-    parser.add_argument('-q', '--quiet', action='store_true',
-                        help='stiffle chatty output')
+    parser.add_argument(
+        '-q', '--quiet', action='store_true', help='stiffle chatty output'
+    )
 
     # === NSS Database Group ===
-    group = parser.add_argument_group('PBKDF2',
-                                      'Specify the PBKDF2 parameters')
+    group = parser.add_argument_group('PBKDF2', 'Specify the PBKDF2 parameters')
 
-    group.add_argument('--pbe-alg',
-                       help='password based encryption algorithm')
-    group.add_argument('--cipher-alg',
-                       help='cipher algorithm')
-    group.add_argument('--prf-alg',
-                       help='pseudo-random function algorithm')
-    group.add_argument('-l', '--key-length',
-                       help='number of octets in derived key')
-    group.add_argument('-s', '--salt',
-                       help='salt as a string, if none then use random data')
+    group.add_argument('--pbe-alg', help='password based encryption algorithm')
+    group.add_argument('--cipher-alg', help='cipher algorithm')
+    group.add_argument('--prf-alg', help='pseudo-random function algorithm')
+    group.add_argument('-l', '--key-length', help='number of octets in derived key')
+    group.add_argument(
+        '-s', '--salt', help='salt as a string, if none then use random data'
+    )
 
+    group = parser.add_argument_group('Encryption', 'Specify the encryption parameters')
 
-    group = parser.add_argument_group('Encryption',
-                                      'Specify the encryption parameters')
+    group.add_argument('-p', '--password', help='PBE password')
 
-    group.add_argument('-p', '--password',
-                       help='PBE password')
+    group.add_argument('-t', '--plain-text', help='string to encrypt')
 
-    group.add_argument('-t', '--plain-text',
-                       help='string to encrypt')
-
-    parser.set_defaults(pbe_alg = 'SEC_OID_PKCS5_PBKDF2',
-                        cipher_alg = 'SEC_OID_AES_256_CBC',
-                        prf_alg = 'SEC_OID_HMAC_SHA1',
-                        iterations = 100,
-                        key_length = 0,
-                        salt = None,
-                        password = 'password',
-                        plain_text = 'Black holes are where God divided by zero - Steven Wright',
-                        )
+    parser.set_defaults(
+        pbe_alg='SEC_OID_PKCS5_PBKDF2',
+        cipher_alg='SEC_OID_AES_256_CBC',
+        prf_alg='SEC_OID_HMAC_SHA1',
+        iterations=100,
+        key_length=0,
+        salt=None,
+        password='password',
+        plain_text='Black holes are where God divided by zero - Steven Wright',
+    )
 
     options = parser.parse_args()
 
@@ -221,7 +233,8 @@ def main():
 
     do_pbkdf2()
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 
 if __name__ == "__main__":
     sys.exit(main())

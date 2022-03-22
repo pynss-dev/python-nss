@@ -1,19 +1,16 @@
-from __future__ import print_function
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
+
 import unittest
 
+from nss import nss
 from nss.error import NSPRError
-import nss.error as nss_error
-import nss.nss as nss
 
-'''
-
+"""
 This test assures we can load a CSR (Certificate Signing Request) and
 properly extract it's contents. A test CSR was generated and below is
 the output from OpenSSL's parsing of that CSR. We deliberately used
 OpenSSL rather than NSS to dump the CSR out in text form because using
 a different implementation helps assure our implementation agrees.
-
 
 % openssl req -in test.pem -text
 Certificate Request:
@@ -83,10 +80,10 @@ k3oiB6JxHLnTY8W8JNB6q3p0sdhA4CohLUIeXG2uBhEGb9HstOXXdJ2ShT0NCj1Z
 k1F95xMe20g7OtKWPVD0hCGRdlZyxSKslldC3M28pbQNXJXYoqVJb64QqPWwrTC2
 A14UcVC+HGFtPly+faSutL65PQ==
 -----END CERTIFICATE REQUEST-----
-'''
+"""
 
 # The exact same PEM data from above
-pem = '''
+pem = """
 -----BEGIN NEW CERTIFICATE REQUEST-----
 MIICrzCCAZcCAQAwFDESMBAGA1UEAxMJbG9jYWxob3N0MIIBIjANBgkqhkiG9w0B
 AQEFAAOCAQ8AMIIBCgKCAQEA1Xr4V+rZTALD7jyHxPvwA8B+ymyqtFF8hCmliZyC
@@ -104,9 +101,10 @@ k3oiB6JxHLnTY8W8JNB6q3p0sdhA4CohLUIeXG2uBhEGb9HstOXXdJ2ShT0NCj1Z
 k1F95xMe20g7OtKWPVD0hCGRdlZyxSKslldC3M28pbQNXJXYoqVJb64QqPWwrTC2
 A14UcVC+HGFtPly+faSutL65PQ==
 -----END NEW CERTIFICATE REQUEST-----
-'''
-class TestCertRequest(unittest.TestCase):
+"""
 
+
+class TestCertRequest(unittest.TestCase):
     def setUp(self):
         nss.nss_init_nodb()
         self.csr_der = nss.SecItem(pem, ascii=True)
@@ -145,12 +143,13 @@ class TestCertRequest(unittest.TestCase):
         self.assertEqual(bc.is_ca, False)
         self.assertEqual(bc.path_len, 0)
 
-
         extension = extensions[1]
         self.assertIsInstance(extension, nss.CertificateExtension)
         self.assertEqual(extension.oid_tag, nss.SEC_OID_X509_SUBJECT_KEY_ID)
-        self.assertEqual(extension.value.der_to_hex().upper(),
-                         '8B:84:44:E2:3B:21:CD:54:37:95:2D:B7:E8:D1:B1:D8:0E:96:56:10')
+        self.assertEqual(
+            extension.value.der_to_hex().upper(),
+            '8B:84:44:E2:3B:21:CD:54:37:95:2D:B7:E8:D1:B1:D8:0E:96:56:10',
+        )
 
         # Validate the attributes, the number of attributes should
         # match and the order of the attributes should match. Each
@@ -196,6 +195,7 @@ class TestCertRequest(unittest.TestCase):
         attribute_value = attribute.values[1]
         self.assertIsInstance(attribute_value, nss.CertificateExtension)
         self.assertEqual(attribute_value.oid_tag, nss.SEC_OID_X509_SUBJECT_KEY_ID)
+
 
 if __name__ == '__main__':
     unittest.main()

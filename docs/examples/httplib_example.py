@@ -1,38 +1,45 @@
-from __future__ import absolute_import
-from __future__ import print_function
+from __future__ import absolute_import, print_function
+
+import argparse
+import errno
+import getpass
+import logging
+import sys
+
+import six.moves.http_client
 
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import argparse
-import errno
-import getpass
-import six.moves.http_client
-import logging
-import sys
 try:
     import urlparse
 except ImportError:
     import urllib.parse as urlparse
-from nss.error import NSPRError
+
 import nss.io as io
 import nss.nss as nss
 import nss.ssl as ssl
+from nss.error import NSPRError
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 timeout_secs = 3
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+
 
 def auth_certificate_callback(sock, check_sig, is_server, certdb):
     cert_is_valid = False
 
     cert = sock.get_peer_certificate()
 
-    logging.debug("auth_certificate_callback: check_sig=%s is_server=%s\n%s",
-                  check_sig, is_server, str(cert))
+    logging.debug(
+        "auth_certificate_callback: check_sig=%s is_server=%s\n%s",
+        check_sig,
+        is_server,
+        str(cert),
+    )
 
     pin_args = sock.get_pkcs11_pin_arg()
     if pin_args is None:
@@ -56,9 +63,11 @@ def auth_certificate_callback(sock, check_sig, is_server, certdb):
         cert_is_valid = False
         return cert_is_valid
 
-    logging.debug("approved_usage = %s intended_usage = %s",
-                  ', '.join(nss.cert_usage_flags(approved_usage)),
-                  ', '.join(nss.cert_usage_flags(intended_usage)))
+    logging.debug(
+        "approved_usage = %s intended_usage = %s",
+        ', '.join(nss.cert_usage_flags(approved_usage)),
+        ', '.join(nss.cert_usage_flags(intended_usage)),
+    )
 
     # Is the intended usage a proper subset of the approved usage
     if approved_usage & intended_usage:
@@ -68,7 +77,7 @@ def auth_certificate_callback(sock, check_sig, is_server, certdb):
 
     # If this is a server, we're finished
     if is_server or not cert_is_valid:
-        logging.debug('cert valid %s for "%s"', cert_is_valid,  cert.subject)
+        logging.debug('cert valid %s for "%s"', cert_is_valid, cert.subject)
         return cert_is_valid
 
     # Certificate is OK.  Since this is the client side of an SSL
@@ -81,17 +90,24 @@ def auth_certificate_callback(sock, check_sig, is_server, certdb):
         # If the cert fails validation it will raise an exception
         cert_is_valid = cert.verify_hostname(hostname)
     except Exception as e:
-        logging.error('failed verifying socket hostname "%s" matches cert subject "%s" (%s)',
-                      hostname, cert.subject, e.strerror)
+        logging.error(
+            'failed verifying socket hostname "%s" matches cert subject "%s" (%s)',
+            hostname,
+            cert.subject,
+            e.strerror,
+        )
         cert_is_valid = False
         return cert_is_valid
 
-    logging.debug('cert valid %s for "%s"', cert_is_valid,  cert.subject)
+    logging.debug('cert valid %s for "%s"', cert_is_valid, cert.subject)
     return cert_is_valid
 
+
 def password_callback(slot, retry, password):
-    if not retry and password: return password
-    return getpass.getpass("Enter password for %s: " % slot.token_name);
+    if not retry and password:
+        return password
+    return getpass.getpass("Enter password for %s: " % slot.token_name)
+
 
 def handshake_callback(sock):
     """
@@ -99,6 +115,7 @@ def handshake_callback(sock):
     """
     logging.debug("handshake complete, peer = %s", sock.get_peer_name())
     pass
+
 
 class NSSConnection(six.moves.http_client.HTTPConnection):
     default_port = six.moves.http_client.HTTPSConnection.default_port
@@ -110,7 +127,8 @@ class NSSConnection(six.moves.http_client.HTTPConnection):
             raise RuntimeError("dbdir is required")
 
         logging.debug('%s init host=%s dbdir=%s', self.__class__.__name__, host, dbdir)
-        if not nss.nss_is_initialized(): nss.nss_init(dbdir)
+        if not nss.nss_is_initialized():
+            nss.nss_init(dbdir)
         self.sock = None
         ssl.set_domestic_policy()
         nss.set_password_callback(password_callback)
@@ -125,9 +143,9 @@ class NSSConnection(six.moves.http_client.HTTPConnection):
         self.sock.set_handshake_callback(handshake_callback)
 
         # Provide a callback to verify the servers certificate
-        self.sock.set_auth_certificate_callback(auth_certificate_callback,
-                                           nss.get_default_certdb())
-
+        self.sock.set_auth_certificate_callback(
+            auth_certificate_callback, nss.get_default_certdb()
+        )
 
     def connect(self):
         logging.debug("connect: host=%s port=%s", self.host, self.port)
@@ -142,13 +160,19 @@ class NSSConnection(six.moves.http_client.HTTPConnection):
             self._create_socket(net_addr.family)
             try:
                 logging.debug("try connect: %s", net_addr)
-                self.sock.connect(net_addr, timeout=io.seconds_to_interval(timeout_secs))
+                self.sock.connect(
+                    net_addr, timeout=io.seconds_to_interval(timeout_secs)
+                )
                 logging.debug("connected to: %s", net_addr)
                 return
             except Exception as e:
                 logging.debug("connect failed: %s (%s)", net_addr, e)
 
-        raise IOError(errno.ENOTCONN, "could not connect to %s at port %d" % (self.host, self.port))
+        raise IOError(
+            errno.ENOTCONN,
+            "could not connect to %s at port %d" % (self.host, self.port),
+        )
+
 
 class NSPRConnection(six.moves.http_client.HTTPConnection):
     default_port = six.moves.http_client.HTTPConnection.default_port
@@ -157,7 +181,8 @@ class NSPRConnection(six.moves.http_client.HTTPConnection):
         six.moves.http_client.HTTPConnection.__init__(self, host, port, strict)
 
         logging.debug('%s init %s', self.__class__.__name__, host)
-        if not nss.nss_is_initialized(): nss.nss_init_nodb()
+        if not nss.nss_is_initialized():
+            nss.nss_init_nodb()
         self.sock = None
 
     def connect(self):
@@ -173,13 +198,19 @@ class NSPRConnection(six.moves.http_client.HTTPConnection):
             self.sock = io.Socket(net_addr.family)
             try:
                 logging.debug("try connect: %s", net_addr)
-                self.sock.connect(net_addr, timeout=io.seconds_to_interval(timeout_secs))
+                self.sock.connect(
+                    net_addr, timeout=io.seconds_to_interval(timeout_secs)
+                )
                 logging.debug("connected to: %s", net_addr)
                 return
             except Exception as e:
                 logging.debug("connect failed: %s (%s)", net_addr, e)
 
-        raise IOError(errno.ENOTCONN, "could not connect to %s at port %d" % (self.host, self.port))
+        raise IOError(
+            errno.ENOTCONN,
+            "could not connect to %s at port %d" % (self.host, self.port),
+        )
+
 
 class NSSHTTPS(six.moves.http_client.HTTP):
     _http_vsn = 11
@@ -195,47 +226,66 @@ class NSSHTTPS(six.moves.http_client.HTTP):
             port = None
         self._setup(self._connection_class(host, port, strict, dbdir=dbdir))
 
+
 class NSPRHTTP(six.moves.http_client.HTTP):
     _http_vsn = 11
     _http_vsn_str = 'HTTP/1.1'
 
     _connection_class = NSPRConnection
 
-#------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 
 
 parser = argparse.ArgumentParser(description='httplib example')
 
-parser.add_argument('-d', '--db-name',
-                    help='NSS database name (e.g. "sql:pki")')
+parser.add_argument('-d', '--db-name', help='NSS database name (e.g. "sql:pki")')
 
-parser.add_argument('--db-passwd',
-                    help='NSS database password')
+parser.add_argument('--db-passwd', help='NSS database password')
 
-parser.add_argument('-s', '--ssl', dest='use_ssl', action='store_true',
-                    help='use SSL connection')
+parser.add_argument(
+    '-s', '--ssl', dest='use_ssl', action='store_true', help='use SSL connection'
+)
 
-parser.add_argument('-S', '--no-ssl', dest='use_ssl', action='store_false',
-                    help='do not use SSL connection')
+parser.add_argument(
+    '-S',
+    '--no-ssl',
+    dest='use_ssl',
+    action='store_false',
+    help='do not use SSL connection',
+)
 
-parser.add_argument('-c', '--connection-class', dest='use_connection_class', action='store_true',
-                    help='use connection class')
+parser.add_argument(
+    '-c',
+    '--connection-class',
+    dest='use_connection_class',
+    action='store_true',
+    help='use connection class',
+)
 
-parser.add_argument('-C', '--no-connection-class', dest='use_connection_class', action='store_false',
-                    help='do not use connection class')
+parser.add_argument(
+    '-C',
+    '--no-connection-class',
+    dest='use_connection_class',
+    action='store_false',
+    help='do not use connection class',
+)
 
-parser.add_argument('-D', '--httplib-debug-level', action='count',
-                    help='httplib debug level')
+parser.add_argument(
+    '-D', '--httplib-debug-level', action='count', help='httplib debug level'
+)
 
-parser.add_argument('url', nargs=1,
-                    help='URL to open (e.g. "https://sourceforge.net/projects/python"')
+parser.add_argument(
+    'url', nargs=1, help='URL to open (e.g. "https://sourceforge.net/projects/python"'
+)
 
-parser.set_defaults(db_name = 'sql:pki',
-                    db_passwd = 'db_passwd',
-                    httplib_debug_level = 0,
-                    use_ssl = True,
-                    use_connection_class = True,
-                    )
+parser.set_defaults(
+    db_name='sql:pki',
+    db_passwd='db_passwd',
+    httplib_debug_level=0,
+    use_ssl=True,
+    use_connection_class=True,
+)
 
 options = parser.parse_args()
 
@@ -248,9 +298,11 @@ if options.httplib_debug_level > 0:
 else:
     logging_debug_level = logging.INFO
 
-logging.basicConfig(level=logging_debug_level,
-                    format='%(asctime)s %(levelname)-8s %(message)s',
-                    datefmt='%m-%d %H:%M')
+logging.basicConfig(
+    level=logging_debug_level,
+    format='%(asctime)s %(levelname)-8s %(message)s',
+    datefmt='%m-%d %H:%M',
+)
 
 # Perform basic configuration and setup
 
@@ -284,7 +336,7 @@ if options.use_connection_class:
         print("%s: %s" % (header[0], header[1]))
     content_length = int(response.getheader('content-length'))
     data = response.read()
-    assert(content_length == len(data))
+    assert content_length == len(data)
     print(data)
     conn.close()
 else:
@@ -303,7 +355,7 @@ else:
     print("headers:\n%s" % headers)
     content_length = int(headers['content-length'])
     f = h.getfile()
-    data = f.read() # Get the raw HTML
-    assert(content_length == len(data))
+    data = f.read()  # Get the raw HTML
+    assert content_length == len(data)
     f.close()
     print(data)

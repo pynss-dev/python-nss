@@ -24317,12 +24317,15 @@ PyDoc_STRVAR(pkcs12_enable_cipher_doc,
         True enables, False disables\n\
 \n\
 The cipher may be one of: \n\
-    - PKCS12_RC2_CBC_40 \n\
-    - PKCS12_RC2_CBC_128 \n\
     - PKCS12_RC4_40 \n\
     - PKCS12_RC4_128 \n\
+    - PKCS12_RC2_CBC_40 \n\
+    - PKCS12_RC2_CBC_128 \n\
     - PKCS12_DES_56 \n\
     - PKCS12_DES_EDE3_168 \n\
+    - PKCS12_AES_CBC_128 \n\
+    - PKCS12_AES_CBC_192 \n\
+    - PKCS12_AES_CBC_256 \n\
 ");
 
 static PyObject *
@@ -24356,12 +24359,15 @@ PyDoc_STRVAR(pkcs12_enable_all_ciphers_doc,
 "pkcs12_enable_all_ciphers()\n\
 \n\
 Enables all PKCS12 ciphers, which are: \n\
-    - `PKCS12_RC2_CBC_40` \n\
-    - `PKCS12_RC2_CBC_128` \n\
     - `PKCS12_RC4_40` \n\
     - `PKCS12_RC4_128` \n\
+    - `PKCS12_RC2_CBC_40` \n\
+    - `PKCS12_RC2_CBC_128` \n\
     - `PKCS12_DES_56` \n\
     - `PKCS12_DES_EDE3_168` \n\
+    - `PKCS12_AES_CBC_128` \n\
+    - `PKCS12_AES_CBC_192` \n\
+    - `PKCS12_AES_CBC_256` \n\
 ");
 
 static PyObject *
@@ -24374,10 +24380,14 @@ pkcs12_enable_all_ciphers(PyObject *self, PyObject *args)
                           PKCS12_RC2_CBC_40,
                           PKCS12_RC2_CBC_128,
                           PKCS12_DES_56,
-                          PKCS12_DES_EDE3_168};
+                          PKCS12_DES_EDE3_168,
+                          PKCS12_AES_CBC_128,
+                          PKCS12_AES_CBC_192,
+                          PKCS12_AES_CBC_256};
 
     TraceMethodEnter(self);
 
+    printf("%ld", sizeof(all_ciphers[0]));
     for (i = 0; i < sizeof(all_ciphers)/sizeof(all_ciphers[0]); i++) {
         cipher = all_ciphers[i];
         if (SEC_PKCS12EnableCipher(cipher, PR_TRUE) != SECSuccess) {
@@ -24409,12 +24419,15 @@ This function enables or disables the preferred flag on a \n\
 PKCS cipher. The default preferred cipher is `PKCS12_RC2_CBC_40`.\n\
 \n\
 The cipher may be one of: \n\
-    - `PKCS12_RC2_CBC_40` \n\
-    - `PKCS12_RC2_CBC_128` \n\
     - `PKCS12_RC4_40` \n\
     - `PKCS12_RC4_128` \n\
+    - `PKCS12_RC2_CBC_40` \n\
+    - `PKCS12_RC2_CBC_128` \n\
     - `PKCS12_DES_56` \n\
     - `PKCS12_DES_EDE3_168` \n\
+    - `PKCS12_AES_CBC_128` \n\
+    - `PKCS12_AES_CBC_192` \n\
+    - `PKCS12_AES_CBC_256` \n\
 ");
 
 static PyObject *
@@ -26169,7 +26182,7 @@ if (_AddIntConstantWithLookup(m, #constant, constant, \
     ExportConstant(SEC_OID_PKCS12_PBE_IDS);
     ExportConstant(SEC_OID_PKCS12_SIGNATURE_IDS);
     ExportConstant(SEC_OID_PKCS12_ENVELOPING_IDS);
-   /* SEC_OID_PKCS12_OFFLINE_TRANSPORT_MODE,
+    /* SEC_OID_PKCS12_OFFLINE_TRANSPORT_MODE,
     SEC_OID_PKCS12_ONLINE_TRANSPORT_MODE, */
     ExportConstant(SEC_OID_PKCS12_PKCS8_KEY_SHROUDING);
     ExportConstant(SEC_OID_PKCS12_KEY_BAG_ID);
@@ -26481,12 +26494,15 @@ if (_AddIntConstantWithLookup(m, #constant, constant, \
 if (_AddIntConstantWithLookup(m, #constant, constant, \
     "PKCS12_", pkcs12_cipher_name_to_value, pkcs12_cipher_value_to_name) < 0) return MOD_ERROR_VAL;
 
-    ExportConstant(PKCS12_RC2_CBC_40);
-    ExportConstant(PKCS12_RC2_CBC_128);
     ExportConstant(PKCS12_RC4_40);
     ExportConstant(PKCS12_RC4_128);
+    ExportConstant(PKCS12_RC2_CBC_40);
+    ExportConstant(PKCS12_RC2_CBC_128);
     ExportConstant(PKCS12_DES_56);
     ExportConstant(PKCS12_DES_EDE3_168);
+    ExportConstant(PKCS12_AES_CBC_128);
+    ExportConstant(PKCS12_AES_CBC_192);
+    ExportConstant(PKCS12_AES_CBC_256);
 
     return MOD_SUCCESS_VAL(m);
 }

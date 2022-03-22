@@ -1,23 +1,27 @@
 #!/usr/bin/python
 
-import types
 import inspect
+import types
 
 import nss.io as io
-import nss.ssl as ssl
 import nss.nss as nss
+import nss.ssl as ssl
+
 
 def isint(object):
-    "Return true if the object is an integer."
+    """Return true if the object is an integer."""
     return isinstance(object, types.IntType)
 
+
 def isstring(object):
-    "Return true if the object is a string."
+    """Return true if the object is a string."""
     return isinstance(object, types.StringTypes)
+
 
 class Package:
     def __init__(self, modules):
         self.modules = modules
+
 
 class Class:
     def __init__(self, cls):
@@ -52,6 +56,7 @@ class Module:
 
         for s in self.strings:
             print "%s.str.%s" % (self.name, s)
+
 
 for m in (io, ssl, nss):
     mod = Module(m)

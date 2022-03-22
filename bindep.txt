@@ -1,0 +1,9 @@
+nss-devel [platform:rpm]
+nss-tools [platform:rpm]
+nspr-devel [platform:rpm]
+
+python3 [platform:rpm]
+python3-devel [platform:rpm]
+python3-pip [platform:rpm]
+
+gcc

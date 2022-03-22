@@ -19,7 +19,7 @@
 #include "nss.h"
 #include "ssl.h"
 #include "sslt.h"
-#include "key.h"
+#include "keyhi.h"
 #include "pk11pub.h"
 #include "pkcs12.h"
 

@@ -1,18 +1,20 @@
-from __future__ import print_function
-from __future__ import absolute_import
-import sys
+from __future__ import absolute_import, print_function
+
 import os
+import sys
 import unittest
 
-import nss.nss as nss
 import six
 
-#-------------------------------------------------------------------------------
+from nss import nss
+
+
 class TestVersion(unittest.TestCase):
     def test_version(self):
 
         version = nss.nss_get_version()
         self.assertEqual(nss.nss_version_check(version), True)
+
 
 class TestShutdownCallback(unittest.TestCase):
     def test_shutdown_callback(self):
@@ -52,7 +54,6 @@ class TestShutdownCallback(unittest.TestCase):
         nss.nss_shutdown()
         self.assertEqual(dict_value['count'], count + 1)
 
-#-------------------------------------------------------------------------------
 
 if __name__ == '__main__':
     unittest.main()

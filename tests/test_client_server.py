@@ -1,22 +1,18 @@
-from __future__ import print_function
-from __future__ import absolute_import
-import os
-import sys
-import errno
-import signal
-import time
+from __future__ import absolute_import, print_function
 
+import errno
+import os
+import signal
+import sys
+import time
 import unittest
 
+from nss import io, nss, ssl
 from nss.error import NSPRError
-import nss.io as io
-import nss.nss as nss
-import nss.ssl as ssl
 
-# -----------------------------------------------------------------------------
-NO_CLIENT_CERT             = 0
-REQUEST_CLIENT_CERT_ONCE   = 1
-REQUIRE_CLIENT_CERT_ONCE   = 2
+NO_CLIENT_CERT = 0
+REQUEST_CLIENT_CERT_ONCE = 1
+REQUIRE_CLIENT_CERT_ONCE = 2
 REQUEST_CLIENT_CERT_ALWAYS = 3
 REQUIRE_CLIENT_CERT_ALWAYS = 4
 
@@ -38,9 +34,12 @@ sleep_time = 5
 # Callback Functions
 # -----------------------------------------------------------------------------
 
+
 def password_callback(slot, retry, password):
-    if password: return password
-    return getpass.getpass("Enter password: ");
+    if password:
+        return password
+    return getpass.getpass("Enter password: ")
+
 
 def handshake_callback(sock):
     if verbose:
@@ -52,9 +51,13 @@ def handshake_callback(sock):
         print("-- handshake complete --")
         print()
 
+
 def auth_certificate_callback(sock, check_sig, is_server, certdb):
     if verbose:
-        print("auth_certificate_callback: check_sig=%s is_server=%s" % (check_sig, is_server))
+        print(
+            "auth_certificate_callback: check_sig=%s is_server=%s"
+            % (check_sig, is_server)
+        )
     cert_is_valid = False
 
     cert = sock.get_peer_certificate()
@@ -62,7 +65,7 @@ def auth_certificate_callback(sock, check_sig, is_server, certdb):
     if pin_args is None:
         pin_args = ()
 
-    #if verbose:
+    # if verbose:
     #    print("cert:\n%s" % cert)
 
     # Define how the cert is being used based upon the is_server flag.  This may
@@ -107,7 +110,10 @@ def auth_certificate_callback(sock, check_sig, is_server, certdb):
 
     hostname = sock.get_hostname()
     if verbose:
-        print("verifying socket hostname (%s) matches cert subject (%s)" % (hostname, cert.subject))
+        print(
+            "verifying socket hostname (%s) matches cert subject (%s)"
+            % (hostname, cert.subject)
+        )
     try:
         # If the cert fails validation it will raise an exception
         cert_is_valid = cert.verify_hostname(hostname)
@@ -121,6 +127,7 @@ def auth_certificate_callback(sock, check_sig, is_server, certdb):
     if verbose:
         print("Returning cert_is_valid = %s" % cert_is_valid)
     return cert_is_valid
+
 
 def client_auth_data_callback(ca_names, chosen_nickname, password, certdb):
     cert = None
@@ -149,9 +156,11 @@ def client_auth_data_callback(ca_names, chosen_nickname, password, certdb):
                 print("client_auth_data_callback: %s" % e, file=sys.stderr)
         return False
 
+
 # -----------------------------------------------------------------------------
 # Client Implementation
 # -----------------------------------------------------------------------------
+
 
 def client(request):
     if use_ssl:
@@ -163,7 +172,9 @@ def client(request):
     try:
         addr_info = io.AddrInfo(hostname)
     except Exception as e:
-        print("client: could not resolve host address \"%s\"" % hostname, file=sys.stderr)
+        print(
+            "client: could not resolve host address \"%s\"" % hostname, file=sys.stderr
+        )
         return
 
     for net_addr in addr_info:
@@ -181,12 +192,17 @@ def client(request):
             sock.set_handshake_callback(handshake_callback)
 
             # Provide a callback to supply our client certificate info
-            sock.set_client_auth_data_callback(client_auth_data_callback, client_nickname,
-                                               password, nss.get_default_certdb())
+            sock.set_client_auth_data_callback(
+                client_auth_data_callback,
+                client_nickname,
+                password,
+                nss.get_default_certdb(),
+            )
 
             # Provide a callback to verify the servers certificate
-            sock.set_auth_certificate_callback(auth_certificate_callback,
-                                               nss.get_default_certdb())
+            sock.set_auth_certificate_callback(
+                auth_certificate_callback, nss.get_default_certdb()
+            )
         else:
             sock = io.Socket(net_addr.family)
 
@@ -199,13 +215,16 @@ def client(request):
             break
         except Exception as e:
             sock.close()
-            print("client: connection to: %s failed (%s)" % (net_addr, e), file=sys.stderr)
+            print(
+                "client: connection to: %s failed (%s)" % (net_addr, e), file=sys.stderr
+            )
 
     # Talk to the server
     try:
         if info:
             print("client: sending \"%s\"" % (request))
-        data = request + "\n"; # newline is protocol record separator
+        data = request + "\n"
+        # newline is protocol record separator
         sock.send(data.encode('utf-8'))
         buf = sock.readline()
         if not buf:
@@ -213,7 +232,7 @@ def client(request):
             sock.close()
             return
         buf = buf.decode('utf-8')
-        buf = buf.rstrip()        # remove newline record separator
+        buf = buf.rstrip()  # remove newline record separator
         if info:
             print("client: received \"%s\"" % (buf))
     except Exception as e:
@@ -238,9 +257,11 @@ def client(request):
 
     return buf
 
+
 # -----------------------------------------------------------------------------
 # Server Implementation
 # -----------------------------------------------------------------------------
+
 
 def server():
     if verbose:
@@ -263,9 +284,9 @@ def server():
         # Get our certificate and private key
         server_cert = nss.find_cert_from_nickname(server_nickname, password)
         priv_key = nss.find_key_by_any_cert(server_cert, password)
-        server_cert_kea = server_cert.find_kea_type();
+        server_cert_kea = server_cert.find_kea_type()
 
-        #if verbose:
+        # if verbose:
         #    print("server cert:\n%s" % server_cert)
 
         sock = ssl.SSLSocket(net_addr.family)
@@ -280,7 +301,9 @@ def server():
             sock.set_ssl_option(ssl.SSL_REQUEST_CERTIFICATE, True)
         if client_cert_action == REQUIRE_CLIENT_CERT_ONCE:
             sock.set_ssl_option(ssl.SSL_REQUIRE_CERTIFICATE, True)
-        sock.set_auth_certificate_callback(auth_certificate_callback, nss.get_default_certdb())
+        sock.set_auth_certificate_callback(
+            auth_certificate_callback, nss.get_default_certdb()
+        )
 
         # Configure the server SSL socket
         sock.config_secure_server(server_cert, priv_key, server_cert_kea)
@@ -306,19 +329,22 @@ def server():
         while True:
             try:
                 # Handle the client connection
-                buf = client_sock.readline()   # newline is protocol record separator
+                buf = client_sock.readline()  # newline is protocol record separator
                 if not buf:
-                    print("server: lost lost connection to %s" % (client_addr), file=sys.stderr)
+                    print(
+                        "server: lost lost connection to %s" % (client_addr),
+                        file=sys.stderr,
+                    )
                     break
                 buf = buf.decode('utf-8')
-                buf = buf.rstrip()             # remove newline record separator
+                buf = buf.rstrip()  # remove newline record separator
 
                 if info:
                     print("server: received \"%s\"" % (buf))
-                reply = "{%s}" % buf           # echo embedded inside braces
+                reply = "{%s}" % buf  # echo embedded inside braces
                 if info:
                     print("server: sending \"%s\"" % (reply))
-                data = reply + "\n" # send echo with record separator
+                data = reply + "\n"  # send echo with record separator
                 client_sock.send(data.encode('utf-8'))
 
                 time.sleep(sleep_time)
@@ -336,7 +362,9 @@ def server():
     if use_ssl:
         ssl.shutdown_server_session_id_cache()
 
+
 # -----------------------------------------------------------------------------
+
 
 def run_server():
     pid = os.fork()
@@ -347,6 +375,7 @@ def run_server():
     time.sleep(sleep_time)
     return pid
 
+
 def cleanup_server(pid):
     try:
         wait_pid, wait_status = os.waitpid(pid, os.WNOHANG)
@@ -354,12 +383,12 @@ def cleanup_server(pid):
             os.kill(pid, signal.SIGKILL)
     except OSError as e:
         if e.errno == errno.ECHILD:
-            pass                # child already exited
+            pass  # child already exited
         else:
             print("cleanup_server: %s" % e, file=sys.stderr)
 
-class TestSSL(unittest.TestCase):
 
+class TestSSL(unittest.TestCase):
     def setUp(self):
         print()
         self.server_pid = run_server()

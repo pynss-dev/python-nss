@@ -126,7 +126,7 @@ server's hostname will be "myhost.example.com".
 
 4. Import public root CA's::
 
-     modutil -add ca_certs -libfile /usr/lib/libnssckbi.so -dbdir ./pki
+     modutil -add ca_certs -libfile /usr/lib64/libnssckbi.so -dbdir ./pki
 
    This is necessary to verify certificates presented by a SSL server a
    NSS client might connect to. When verifying a certificate the NSS
@@ -301,4 +301,4 @@ To be added
 
 """
 
-__version__ = '1.0.1'
+__version__ = '1.0.2'

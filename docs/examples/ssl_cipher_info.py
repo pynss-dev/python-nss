@@ -1,23 +1,23 @@
-from __future__ import absolute_import
-from __future__ import print_function
+from __future__ import absolute_import, print_function
 
 import argparse
 import sys
 
-from nss.error import NSPRError
 import nss.io as io
 import nss.nss as nss
 import nss.ssl as ssl
+from nss.error import NSPRError
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 
 TIMEOUT_SECS = 3
 
-REQUEST = '''\
+REQUEST = """\
 GET /index.html HTTP/1.0
 
-'''
-#-------------------------------------------------------------------------------
+"""
+# -------------------------------------------------------------------------------
+
 
 def print_suite_info(suite):
     print("Suite:")
@@ -26,23 +26,24 @@ def print_suite_info(suite):
     if not options.use_properties:
         print(suite)
     else:
-        print("cipher_suite_name:     %s"  % (suite.cipher_suite_name))
+        print("cipher_suite_name:     %s" % (suite.cipher_suite_name))
         print("cipher_suite:          %#x" % (suite.cipher_suite))
-        print("auth_algorithm_name:   %s"  % (suite.auth_algorithm_name))
+        print("auth_algorithm_name:   %s" % (suite.auth_algorithm_name))
         print("auth_algorithm:        %#x" % (suite.auth_algorithm))
-        print("kea_type_name:         %s"  % (suite.kea_type_name))
+        print("kea_type_name:         %s" % (suite.kea_type_name))
         print("kea_type:              %#x" % (suite.kea_type))
-        print("symmetric_cipher_name: %s"  % (suite.symmetric_cipher_name))
+        print("symmetric_cipher_name: %s" % (suite.symmetric_cipher_name))
         print("symmetric_cipher:      %#x" % (suite.symmetric_cipher))
-        print("symmetric_key_bits:    %s"  % (suite.symmetric_key_bits))
-        print("symmetric_key_space:   %s"  % (suite.symmetric_key_space))
-        print("effective_key_bits:    %s"  % (suite.effective_key_bits))
-        print("mac_algorithm_name:    %s"  % (suite.mac_algorithm_name))
+        print("symmetric_key_bits:    %s" % (suite.symmetric_key_bits))
+        print("symmetric_key_space:   %s" % (suite.symmetric_key_space))
+        print("effective_key_bits:    %s" % (suite.effective_key_bits))
+        print("mac_algorithm_name:    %s" % (suite.mac_algorithm_name))
         print("mac_algorithm:         %#x" % (suite.mac_algorithm))
-        print("mac_bits:              %s"  % (suite.mac_bits))
-        print("is_fips:               %s"  % (suite.is_fips))
-        print("is_exportable:         %s"  % (suite.is_exportable))
-        print("is_nonstandard:        %s"  % (suite.is_nonstandard))
+        print("mac_bits:              %s" % (suite.mac_bits))
+        print("is_fips:               %s" % (suite.is_fips))
+        print("is_exportable:         %s" % (suite.is_exportable))
+        print("is_nonstandard:        %s" % (suite.is_nonstandard))
+
 
 def print_channel_info(channel):
     print("Channel:")
@@ -52,27 +53,30 @@ def print_channel_info(channel):
         print(channel)
     else:
         print("protocol_version:        %#x" % (channel.protocol_version))
-        print("protocol_version string: %s"  % (channel.protocol_version_str))
+        print("protocol_version string: %s" % (channel.protocol_version_str))
         print("protocol_version enum:   %#x" % (channel.protocol_version_enum))
-        print("major_protocol_version:  %s"  % (channel.major_protocol_version))
-        print("minor_protocol_version:  %s"  % (channel.minor_protocol_version))
+        print("major_protocol_version:  %s" % (channel.major_protocol_version))
+        print("minor_protocol_version:  %s" % (channel.minor_protocol_version))
         print("cipher_suite:            %#x" % (channel.cipher_suite))
-        print("auth_key_bits:           %d"  % (channel.auth_key_bits))
-        print("kea_key_bits:            %d"  % (channel.kea_key_bits))
-        print("creation_time:           %s"  % (channel.creation_time))
-        print("last_access_time:        %s"  % (channel.last_access_time))
-        print("expiration_time:         %s"  % (channel.expiration_time))
-        print("creation_time_utc:       %s"  % (channel.creation_time_utc))
-        print("last_access_time_utc:    %s"  % (channel.last_access_time_utc))
-        print("expiration_time_utc:     %s"  % (channel.expiration_time_utc))
+        print("auth_key_bits:           %d" % (channel.auth_key_bits))
+        print("kea_key_bits:            %d" % (channel.kea_key_bits))
+        print("creation_time:           %s" % (channel.creation_time))
+        print("last_access_time:        %s" % (channel.last_access_time))
+        print("expiration_time:         %s" % (channel.expiration_time))
+        print("creation_time_utc:       %s" % (channel.creation_time_utc))
+        print("last_access_time_utc:    %s" % (channel.last_access_time_utc))
+        print("expiration_time_utc:     %s" % (channel.expiration_time_utc))
         print("compression_method:      %#x" % (channel.compression_method))
-        print("compression_method_name: %s"  % (channel.compression_method_name))
-        print("session_id:              %s"  % (channel.session_id))
+        print("compression_method_name: %s" % (channel.compression_method_name))
+        print("session_id:              %s" % (channel.session_id))
+
 
 def handshake_callback(sock):
 
-    print("handshake complete, peer = %s, negotiated host = %s" %
-          (sock.get_peer_name(), sock.get_negotiated_host()))
+    print(
+        "handshake complete, peer = %s, negotiated host = %s"
+        % (sock.get_peer_name(), sock.get_negotiated_host())
+    )
     print("Connection Info:")
     print(sock.connection_info_str())
     print()
@@ -84,10 +88,12 @@ def handshake_callback(sock):
     suite = ssl.get_cipher_suite_info(channel.cipher_suite)
     print_suite_info(suite)
 
+
 def ssl_connect():
     print("SSL connect to: %s" % options.hostname)
 
     valid_addr = False
+
     # Get the IP Address of our server
     try:
         addr_info = io.AddrInfo(options.hostname)
@@ -148,38 +154,47 @@ parser = argparse.ArgumentParser(
     description='Example showing how to enumerate cipher suites and '
     'get their properties as well as how to get SSL channel information '
     'after connecting including the cipher suite in use',
-    formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+)
 
-parser.add_argument('-d', '--db-name',
-                    help='NSS database name (e.g. "sql:pki")')
+parser.add_argument('-d', '--db-name', help='NSS database name (e.g. "sql:pki")')
 
-parser.add_argument('-H', '--hostname',
-                    help='host to connect to')
+parser.add_argument('-H', '--hostname', help='host to connect to')
 
-parser.add_argument('-p', '--port', type=int,
-                    help='host port')
+parser.add_argument('-p', '--port', type=int, help='host port')
 
-parser.add_argument('-E', '--no-enumerate-cipher-suites',
-                    dest='enumerate_cipher_suites',
-                    action='store_false',
-                    help='do not enumerate cipher suites')
+parser.add_argument(
+    '-E',
+    '--no-enumerate-cipher-suites',
+    dest='enumerate_cipher_suites',
+    action='store_false',
+    help='do not enumerate cipher suites',
+)
 
-parser.add_argument('-S', '--no-ssl-connect',
-                    dest='ssl_connect',
-                    action='store_false',
-                    help='do not perform SSL connection')
+parser.add_argument(
+    '-S',
+    '--no-ssl-connect',
+    dest='ssl_connect',
+    action='store_false',
+    help='do not perform SSL connection',
+)
 
-parser.add_argument('-P', '--use-properties',
-                    dest='use_properties',
-                    action='store_true',
-                    help='print using object properties')
+parser.add_argument(
+    '-P',
+    '--use-properties',
+    dest='use_properties',
+    action='store_true',
+    help='print using object properties',
+)
 
-parser.set_defaults(db_name='sql:pki',
-                    hostname='www.verisign.com',
-                    port=443,
-                    enumerate_cipher_suites=True,
-                    ssl_connect=True,
-                    use_properties=False)
+parser.set_defaults(
+    db_name='sql:pki',
+    hostname='www.verisign.com',
+    port=443,
+    enumerate_cipher_suites=True,
+    ssl_connect=True,
+    use_properties=False,
+)
 
 options = parser.parse_args()
 
@@ -196,8 +211,7 @@ except Exception as e:
 if options.enumerate_cipher_suites:
     suite_info = ssl.get_cipher_suite_info(ssl.ssl_implemented_ciphers[0])
 
-    print("There are %d implemented ciphers" %
-          (len(ssl.ssl_implemented_ciphers)))
+    print("There are %d implemented ciphers" % (len(ssl.ssl_implemented_ciphers)))
 
     for cipher in ssl.ssl_implemented_ciphers:
         suite_info = ssl.get_cipher_suite_info(cipher)

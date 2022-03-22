@@ -1,31 +1,32 @@
-from __future__ import absolute_import
-from __future__ import print_function
-
-# This Source Code Form is subject to the terms of the Mozilla Public
-# License, v. 2.0. If a copy of the MPL was not distributed with this
-# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+from __future__ import absolute_import, print_function
 
 import argparse
 import getpass
 import os
 import sys
 
-from nss.error import NSPRError
 import nss.io as io
 import nss.nss as nss
 import nss.ssl as ssl
+from nss.error import NSPRError
+
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 
 # -----------------------------------------------------------------------------
 
 timeout_secs = 3
 
-request = '''\
+request = """\
 GET /index.html HTTP/1.0
 
-'''
+"""
 # -----------------------------------------------------------------------------
 # Callback Functions
 # -----------------------------------------------------------------------------
+
 
 def handshake_callback(sock):
     print("-- handshake complete --")
@@ -36,8 +37,11 @@ def handshake_callback(sock):
     print("-- handshake complete --")
     print()
 
+
 def auth_certificate_callback(sock, check_sig, is_server, certdb):
-    print("auth_certificate_callback: check_sig=%s is_server=%s" % (check_sig, is_server))
+    print(
+        "auth_certificate_callback: check_sig=%s is_server=%s" % (check_sig, is_server)
+    )
     cert_is_valid = False
 
     cert = sock.get_peer_certificate()
@@ -85,7 +89,10 @@ def auth_certificate_callback(sock, check_sig, is_server, certdb):
     # man-in-the-middle attacks.
 
     hostname = sock.get_hostname()
-    print("verifying socket hostname (%s) matches cert subject (%s)" % (hostname, cert.subject))
+    print(
+        "verifying socket hostname (%s) matches cert subject (%s)"
+        % (hostname, cert.subject)
+    )
     try:
         # If the cert fails validation it will raise an exception
         cert_is_valid = cert.verify_hostname(hostname)
@@ -98,9 +105,11 @@ def auth_certificate_callback(sock, check_sig, is_server, certdb):
     print("Returning cert_is_valid = %s" % cert_is_valid)
     return cert_is_valid
 
+
 # -----------------------------------------------------------------------------
 # Client Implementation
 # -----------------------------------------------------------------------------
+
 
 def client():
     valid_addr = False
@@ -124,8 +133,9 @@ def client():
         sock.set_handshake_callback(handshake_callback)
 
         # Provide a callback to verify the servers certificate
-        sock.set_auth_certificate_callback(auth_certificate_callback,
-                                           nss.get_default_certdb())
+        sock.set_auth_certificate_callback(
+            auth_certificate_callback, nss.get_default_certdb()
+        )
 
         try:
             print("try connecting to: %s" % (net_addr))
@@ -158,30 +168,29 @@ def client():
     sock.shutdown()
     return
 
+
 # -----------------------------------------------------------------------------
 
-parser = argparse.ArgumentParser(description='certificate verification example',
-                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+parser = argparse.ArgumentParser(
+    description='certificate verification example',
+    formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+)
 
-parser.add_argument('-d', '--db-name',
-                    help='NSS database name (e.g. "sql:pki")')
+parser.add_argument('-d', '--db-name', help='NSS database name (e.g. "sql:pki")')
 
-parser.add_argument('-H', '--hostname',
-                    help='host to connect to')
+parser.add_argument('-H', '--hostname', help='host to connect to')
 
-parser.add_argument('-p', '--port', type=int,
-                    help='host port')
+parser.add_argument('-p', '--port', type=int, help='host port')
 
-parser.set_defaults(db_name = 'sql:pki',
-                    hostname = 'www.verisign.com',
-                    port = 443,
-                    )
+parser.set_defaults(
+    db_name='sql:pki',
+    hostname='www.verisign.com',
+    port=443,
+)
 
-parser.add_argument('--min-ssl-version',
-                    help='minimum SSL version')
+parser.add_argument('--min-ssl-version', help='minimum SSL version')
 
-parser.add_argument('--max-ssl-version',
-                    help='minimum SSL version')
+parser.add_argument('--max-ssl-version', help='minimum SSL version')
 
 options = parser.parse_args()
 
@@ -190,32 +199,41 @@ try:
     nss.nss_init(options.db_name)
     ssl.set_domestic_policy()
 
-    min_ssl_version, max_ssl_version = \
-        ssl.get_supported_ssl_version_range(repr_kind=nss.AsString)
-    print("Supported SSL version range: min=%s, max=%s" % \
-        (min_ssl_version, max_ssl_version))
+    min_ssl_version, max_ssl_version = ssl.get_supported_ssl_version_range(
+        repr_kind=nss.AsString
+    )
+    print(
+        "Supported SSL version range: min=%s, max=%s"
+        % (min_ssl_version, max_ssl_version)
+    )
 
-    min_ssl_version, max_ssl_version = \
-        ssl.get_default_ssl_version_range(repr_kind=nss.AsString)
-    print("Default SSL version range: min=%s, max=%s" % \
-        (min_ssl_version, max_ssl_version))
+    min_ssl_version, max_ssl_version = ssl.get_default_ssl_version_range(
+        repr_kind=nss.AsString
+    )
+    print(
+        "Default SSL version range: min=%s, max=%s" % (min_ssl_version, max_ssl_version)
+    )
 
-    if options.min_ssl_version is not None or \
-       options.max_ssl_version is not None:
+    if options.min_ssl_version is not None or options.max_ssl_version is not None:
 
         if options.min_ssl_version is not None:
-            min_ssl_version  = options.min_ssl_version
+            min_ssl_version = options.min_ssl_version
         if options.max_ssl_version is not None:
-            max_ssl_version  = options.max_ssl_version
+            max_ssl_version = options.max_ssl_version
 
-        print("Setting default SSL version range: min=%s, max=%s" % \
-            (min_ssl_version, max_ssl_version))
+        print(
+            "Setting default SSL version range: min=%s, max=%s"
+            % (min_ssl_version, max_ssl_version)
+        )
         ssl.set_default_ssl_version_range(min_ssl_version, max_ssl_version)
 
-        min_ssl_version, max_ssl_version = \
-            ssl.get_default_ssl_version_range(repr_kind=nss.AsString)
-        print("Default SSL version range now: min=%s, max=%s" % \
-            (min_ssl_version, max_ssl_version))
+        min_ssl_version, max_ssl_version = ssl.get_default_ssl_version_range(
+            repr_kind=nss.AsString
+        )
+        print(
+            "Default SSL version range now: min=%s, max=%s"
+            % (min_ssl_version, max_ssl_version)
+        )
 
 except Exception as e:
     print(str(e), file=sys.stderr)

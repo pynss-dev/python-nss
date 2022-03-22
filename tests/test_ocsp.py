@@ -1,19 +1,17 @@
-from __future__ import print_function
-from __future__ import absolute_import
-import sys
+from __future__ import absolute_import, print_function
+
 import os
+import sys
 import unittest
 
-import nss.nss as nss
+from nss import nss
 from nss.error import NSPRError
 
 db_name = 'sql:pki'
 
-#-------------------------------------------------------------------------------
 
 # At the moment the OCSP tests are weak, we just test we can
 # successfully call each of the functions.
-
 class TestAPI(unittest.TestCase):
     def setUp(self):
         nss.nss_init_read_write(db_name)
@@ -40,7 +38,9 @@ class TestAPI(unittest.TestCase):
     def test_ocsp_default_responder(self):
         # should raise error if cert is not known
         with self.assertRaises(NSPRError):
-            nss.set_ocsp_default_responder(self.certdb, "http://foo.com:80/ocsp", 'invalid')
+            nss.set_ocsp_default_responder(
+                self.certdb, "http://foo.com:80/ocsp", 'invalid'
+            )
         nss.set_ocsp_default_responder(self.certdb, "http://foo.com:80/ocsp", 'test_ca')
         nss.enable_ocsp_default_responder()
         nss.disable_ocsp_default_responder()
@@ -68,8 +68,6 @@ class TestAPI(unittest.TestCase):
 
         self.assertEqual(nss.set_use_pkix_for_validation(value), not value)
 
-
-#-------------------------------------------------------------------------------
 
 if __name__ == '__main__':
     unittest.main()

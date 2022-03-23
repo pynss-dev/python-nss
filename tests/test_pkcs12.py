@@ -159,7 +159,8 @@ class TestPKCS12Decoder(unittest.TestCase):
         nss.nss_init_read_write(db_name)
         nss.set_password_callback(password_callback)
         nss.pkcs12_set_nickname_collision_callback(nickname_collision_callback)
-        nss.pkcs12_enable_all_ciphers()
+        # XXX: error in NSS prevents enabling ciphers
+        # nss.pkcs12_enable_all_ciphers()
         self.cert_der = get_cert_der_from_db(cert_nickname)
         if self.cert_der is None:
             raise ValueError(
@@ -262,7 +263,8 @@ class TestPKCS12Export(unittest.TestCase):
     def setUp(self):
         nss.nss_init(db_name)
         nss.set_password_callback(password_callback)
-        nss.pkcs12_enable_all_ciphers()
+        # XXX: error in NSS prevents enabling ciphers
+        # nss.pkcs12_enable_all_ciphers()
         self.cert_der = get_cert_der_from_db(cert_nickname)
         if self.cert_der is None:
             raise ValueError(

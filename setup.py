@@ -17,7 +17,7 @@ from distutils.util import change_root, subst_vars
 from sphinx.setup_command import BuildDoc as SphinxBuildDoc
 
 name = 'python-nss'
-version = '1.0.2'
+version = '2.0.0'
 release = version
 
 doc_manifest = [

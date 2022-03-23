@@ -1829,7 +1829,7 @@ SECItem_to_base64(SECItem *item, size_t chars_per_line, char *pem_type)
         src_end = base64 + base64_len;
 
         while(src < src_end) {
-            line_len = MIN(chars_per_line, src_end - src);
+            line_len = MIN(chars_per_line, (unsigned long)(src_end - src));
             if ((line = PyUnicode_FromStringAndSize(src, line_len)) == NULL) {
                 goto fail;
             }
@@ -4815,7 +4815,7 @@ CERTAVA_value_to_pystr(CERTAVA *ava)
      * can't get the canonical name use a dotted-decimal OID
      * representation instead.
      */
-    if ((oid_tag = CERT_GetAVATag(ava)) != -1) {
+    if ((oid_tag = CERT_GetAVATag(ava)) != (SECOidTag)-1) {
         attr_name = ava_oid_tag_to_name(oid_tag);
     }
 
@@ -4879,7 +4879,7 @@ CERTRDN_to_pystr(CERTRDN *rdn)
          * can't get the canonical name use a dotted-decimal OID
          * representation instead.
          */
-        if ((oid_tag = CERT_GetAVATag(ava)) != -1) {
+        if ((oid_tag = CERT_GetAVATag(ava)) != (SECOidTag)-1) {
             attr_name = ava_oid_tag_to_name(oid_tag);
         }
 
@@ -7117,14 +7117,15 @@ PyRSAPublicKey_get_exponent(PyRSAPublicKey *self, void *closure)
     return self->py_exponent;
 }
 
-static
-PyGetSetDef PyRSAPublicKey_getseters[] = {
+static PyGetSetDef
+PyRSAPublicKey_getseters[] = {
     {"modulus",  (getter)PyRSAPublicKey_get_modulus,  (setter)NULL, "RSA modulus", NULL},
     {"exponent", (getter)PyRSAPublicKey_get_exponent, (setter)NULL, "RSA exponent", NULL},
     {NULL}  /* Sentinel */
 };
 
-static PyMemberDef PyRSAPublicKey_members[] = {
+static PyMemberDef
+PyRSAPublicKey_members[] = {
     {NULL}  /* Sentinel */
 };
 
@@ -10189,7 +10190,7 @@ Certificate_get_extension(Certificate *self, PyObject *args, PyObject *kwds)
                                      &py_oid))
         return NULL;
 
-    if ((oid_tag = get_oid_tag_from_object(py_oid)) == -1) {
+    if ((oid_tag = get_oid_tag_from_object(py_oid)) == (SECOidTag)-1) {
         return NULL;
     }
 
@@ -23443,21 +23444,21 @@ pk11_create_pbev2_algorithm_id(PyObject *self, PyObject *args, PyObject *kwds)
         return NULL;
 
     if (py_pbe_alg) {
-        if ((pbe_alg_tag = get_oid_tag_from_object(py_pbe_alg)) == -1) {
+        if ((pbe_alg_tag = get_oid_tag_from_object(py_pbe_alg)) == (SECOidTag)-1) {
             SECItem_param_release(salt_param);
             return NULL;
         }
     }
 
     if (py_cipher_alg) {
-        if ((cipher_alg_tag = get_oid_tag_from_object(py_cipher_alg)) == -1) {
+        if ((cipher_alg_tag = get_oid_tag_from_object(py_cipher_alg)) == (SECOidTag)-1) {
             SECItem_param_release(salt_param);
             return NULL;
         }
     }
 
     if (py_prf_alg) {
-        if ((prf_alg_tag = get_oid_tag_from_object(py_prf_alg)) == -1) {
+        if ((prf_alg_tag = get_oid_tag_from_object(py_prf_alg)) == (SECOidTag)-1) {
             SECItem_param_release(salt_param);
             return NULL;
         }
@@ -24317,15 +24318,15 @@ PyDoc_STRVAR(pkcs12_enable_cipher_doc,
         True enables, False disables\n\
 \n\
 The cipher may be one of: \n\
-    - PKCS12_RC4_40 \n\
-    - PKCS12_RC4_128 \n\
-    - PKCS12_RC2_CBC_40 \n\
-    - PKCS12_RC2_CBC_128 \n\
-    - PKCS12_DES_56 \n\
-    - PKCS12_DES_EDE3_168 \n\
-    - PKCS12_AES_CBC_128 \n\
-    - PKCS12_AES_CBC_192 \n\
-    - PKCS12_AES_CBC_256 \n\
+    - `PKCS12_RC2_CBC_40` \n\
+    - `PKCS12_RC2_CBC_128` \n\
+    - `PKCS12_RC4_40` \n\
+    - `PKCS12_RC4_128` \n\
+    - `PKCS12_DES_56` \n\
+    - `PKCS12_DES_EDE3_168` \n\
+    - `PKCS12_AES_CBC_128` \n\
+    - `PKCS12_AES_CBC_192` \n\
+    - `PKCS12_AES_CBC_256` \n\
 ");
 
 static PyObject *
@@ -24341,8 +24342,10 @@ pkcs12_enable_cipher(PyObject *self, PyObject *args)
 
     if (SEC_PKCS12EnableCipher(cipher, enabled ? PR_TRUE : PR_FALSE) != SECSuccess) {
         PyObject *py_name = pkcs12_cipher_to_pystr(cipher);
+        if (py_name == NULL)
+            return NULL;
         PyObject *py_name_utf8 = PyBaseString_UTF8(py_name, "cipher name");
-        PyObject *py_err_msg = PyBytes_FromFormat("Failed to %s %s (%lx) pkcs12 cipher",
+        PyObject *py_err_msg = PyBytes_FromFormat("Failed to %s %s (%lu) pkcs12 cipher",
                                                   enabled ? _("enable") : _("disable"),
                                                   PyBytes_AS_STRING(py_name_utf8), cipher);
         set_nspr_error("%s", PyBytes_AsString(py_err_msg));
@@ -24359,10 +24362,10 @@ PyDoc_STRVAR(pkcs12_enable_all_ciphers_doc,
 "pkcs12_enable_all_ciphers()\n\
 \n\
 Enables all PKCS12 ciphers, which are: \n\
-    - `PKCS12_RC4_40` \n\
-    - `PKCS12_RC4_128` \n\
     - `PKCS12_RC2_CBC_40` \n\
     - `PKCS12_RC2_CBC_128` \n\
+    - `PKCS12_RC4_40` \n\
+    - `PKCS12_RC4_128` \n\
     - `PKCS12_DES_56` \n\
     - `PKCS12_DES_EDE3_168` \n\
     - `PKCS12_AES_CBC_128` \n\
@@ -24373,12 +24376,12 @@ Enables all PKCS12 ciphers, which are: \n\
 static PyObject *
 pkcs12_enable_all_ciphers(PyObject *self, PyObject *args)
 {
-    int i;
+    unsigned int i;
     long cipher;
-    long all_ciphers[] = {PKCS12_RC4_40,
-                          PKCS12_RC4_128,
-                          PKCS12_RC2_CBC_40,
+    long unsigned all_ciphers[] = {PKCS12_RC2_CBC_40,
                           PKCS12_RC2_CBC_128,
+                          PKCS12_RC4_40,
+                          PKCS12_RC4_128,
                           PKCS12_DES_56,
                           PKCS12_DES_EDE3_168,
                           PKCS12_AES_CBC_128,
@@ -24387,13 +24390,13 @@ pkcs12_enable_all_ciphers(PyObject *self, PyObject *args)
 
     TraceMethodEnter(self);
 
-    printf("%ld", sizeof(all_ciphers[0]));
     for (i = 0; i < sizeof(all_ciphers)/sizeof(all_ciphers[0]); i++) {
         cipher = all_ciphers[i];
+        /* XXX: error in NSS does not ever return SECSuccess */
         if (SEC_PKCS12EnableCipher(cipher, PR_TRUE) != SECSuccess) {
             PyObject *py_name = pkcs12_cipher_to_pystr(cipher);
             PyObject *py_name_utf8 = PyBaseString_UTF8(py_name, "cipher name");
-            PyObject *py_err_msg = PyBytes_FromFormat("Failed to enable %s (%lx) pkcs12 cipher",
+            PyObject *py_err_msg = PyBytes_FromFormat("Failed to enable %s (%lu) pkcs12 cipher",
                                                       PyBytes_AsString(py_name_utf8), cipher);
             set_nspr_error("%s", PyBytes_AsString(py_err_msg));
             Py_DECREF(py_name);
@@ -24411,18 +24414,18 @@ PyDoc_STRVAR(pkcs12_set_preferred_cipher_doc,
 \n\
 :Parameters:\n\
     cipher : integer\n\
-        The PKCS12 cipher suite enumeration (e.g. `PKCS12_DES_EDE3_168`, etc.)\n\
+        The PKCS12 cipher suite enumeration (e.g. `PKCS12_AES_CBC_128`, etc.)\n\
     enabled : bool or int\n\
         True enables, False disables\n\
 \n\
 This function enables or disables the preferred flag on a \n\
-PKCS cipher. The default preferred cipher is `PKCS12_RC2_CBC_40`.\n\
+PKCS cipher. The default preferred cipher is `PKCS12_AES_CBC_128`.\n\
 \n\
 The cipher may be one of: \n\
-    - `PKCS12_RC4_40` \n\
-    - `PKCS12_RC4_128` \n\
     - `PKCS12_RC2_CBC_40` \n\
     - `PKCS12_RC2_CBC_128` \n\
+    - `PKCS12_RC4_40` \n\
+    - `PKCS12_RC4_128` \n\
     - `PKCS12_DES_56` \n\
     - `PKCS12_DES_EDE3_168` \n\
     - `PKCS12_AES_CBC_128` \n\
@@ -26494,10 +26497,10 @@ if (_AddIntConstantWithLookup(m, #constant, constant, \
 if (_AddIntConstantWithLookup(m, #constant, constant, \
     "PKCS12_", pkcs12_cipher_name_to_value, pkcs12_cipher_value_to_name) < 0) return MOD_ERROR_VAL;
 
-    ExportConstant(PKCS12_RC4_40);
-    ExportConstant(PKCS12_RC4_128);
     ExportConstant(PKCS12_RC2_CBC_40);
     ExportConstant(PKCS12_RC2_CBC_128);
+    ExportConstant(PKCS12_RC4_40);
+    ExportConstant(PKCS12_RC4_128);
     ExportConstant(PKCS12_DES_56);
     ExportConstant(PKCS12_DES_EDE3_168);
     ExportConstant(PKCS12_AES_CBC_128);

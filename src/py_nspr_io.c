@@ -3138,7 +3138,7 @@ Socket_poll(Socket *self, PyObject *args)
     Py_ssize_t num_descs;
     PRPollDesc *descs;
     unsigned int timeout;
-    size_t i;
+    Py_ssize_t i;
     long flags;
 
     if (!PyArg_ParseTuple(args, "OI:poll", &py_descs, &timeout))

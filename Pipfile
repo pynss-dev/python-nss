@@ -17,6 +17,7 @@ tox = "*"
 hg = "*"
 mercurial = "*"
 twine = "*"
+flawfinder = "*"
 
 [scripts]
 check-env = "bindep"

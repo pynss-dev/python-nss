@@ -15,8 +15,6 @@ print "Certificate is %s" % cert
 What this example really aims to do is illustrate how to access the various
 components of a cert.
 """
-from __future__ import absolute_import, print_function
-
 import argparse
 import getpass
 import os

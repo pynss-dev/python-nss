@@ -16,7 +16,6 @@ enumeration.
 This example does not illustrate the proper selection of protocol
 values nor actual SSL/TLS communication.
 """
-from __future__ import absolute_import, print_function
 
 import nss.io as io
 import nss.nss as nss

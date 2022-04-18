@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import argparse
 import atexit
 import logging
@@ -10,8 +8,6 @@ import subprocess
 import sys
 import tempfile
 from string import Template
-
-import six
 
 logger = None
 
@@ -603,7 +599,7 @@ def setup_certs(args):
             continue
         value = getattr(options, key)
         # Can't substitue on non-string values
-        if not isinstance(value, six.string_types):
+        if not isinstance(value, str):
             continue
         # Don't bother trying to substitute if $ substitution character isn't present
         if '$' not in value:

@@ -1,5 +1,3 @@
-from __future__ import absolute_import, print_function
-
 import errno
 import os
 import signal
@@ -28,7 +26,6 @@ client_nickname = 'test_user'
 port = 1234
 timeout_secs = 10
 sleep_time = 5
-
 
 # -----------------------------------------------------------------------------
 # Callback Functions

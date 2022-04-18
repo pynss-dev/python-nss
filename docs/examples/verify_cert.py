@@ -1,11 +1,3 @@
-from __future__ import absolute_import, print_function
-
-import argparse
-import sys
-
-import nss.error as nss_error
-import nss.nss as nss
-
 """
 This example illustrates how one can use NSS to verify (validate) a
 certificate. Certificate validation starts with an intended usage for
@@ -37,6 +29,12 @@ options necessary to make the example flexible.
 * The results are pretty printed.
 
 """
+import argparse
+import sys
+
+import nss.error as nss_error
+import nss.nss as nss
+
 
 # -------------------------------------------------------------------------------
 cert_usage_map = {

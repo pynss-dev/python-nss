@@ -2,8 +2,6 @@ import os
 import sys
 import unittest
 
-import six
-
 from nss import nss
 
 
@@ -27,7 +25,7 @@ class TestShutdownCallback(unittest.TestCase):
             self.assertEqual(isinstance(i, int), True)
             self.assertEqual(i, int_value)
 
-            self.assertEqual(isinstance(s, six.string_types), True)
+            self.assertEqual(isinstance(s, str), True)
             self.assertEqual(s, str_value)
 
             self.assertEqual(isinstance(d, dict), True)

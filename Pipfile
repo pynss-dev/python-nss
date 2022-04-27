@@ -18,6 +18,7 @@ hg = "*"
 mercurial = "*"
 twine = "*"
 flawfinder = "*"
+pytest = "<7"
 
 [scripts]
 check-env = "bindep"

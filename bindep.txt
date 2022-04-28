@@ -1,9 +1,14 @@
+libnss3 [platform:ubuntu]
+libnss3-dev [platform:ubuntu]
+libnss3-tools [platform:ubuntu]
+
 nss-devel [platform:rpm]
 nss-tools [platform:rpm]
 nspr-devel [platform:rpm]
 
-python3 [platform:rpm]
+python3-dev [platform:dpkg]
 python3-devel [platform:rpm]
-python3-pip [platform:rpm]
+python3-pip [platform:base-py3]
+python3 [platform:base-py3]
 
 gcc

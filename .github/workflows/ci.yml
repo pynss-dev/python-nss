@@ -44,7 +44,7 @@ jobs:
           python -m pip install --user pipenv
           pipenv install --dev
       - name: Validate build environment
-        run: bindep --file bindep.txt
+        run: pipenv run bindep --file bindep.txt
       - name: Perform build
         run: pipenv run python setup.py bdist_wheel
       - name: Download versioned files
@@ -76,7 +76,7 @@ jobs:
           python -m pip install --user pipenv
           pipenv install --dev
       # - name: Validate test environment
-      #   run: bindep --file bindep.txt runtime
+      #   run: pipenv run bindep --file bindep.txt runtime
       - name: Run test suite
         run: ./tests/run_tests.py
   publish:

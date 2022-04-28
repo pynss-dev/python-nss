@@ -15,7 +15,7 @@ from setuptools._distutils.util import change_root, subst_vars
 from sphinx.setup_command import BuildDoc as SphinxBuildDoc
 
 name = 'python-nss'
-version = '2.0.0'
+version = '2.0.0.dev0'
 release = version
 
 doc_manifest = [
@@ -31,7 +31,17 @@ doc_manifest = [
     ],
     [
         [
-            'recursive-include test run_tests setup_certs.py test_*.py util.py *.txt',
+            ' '.join(
+                [
+                    'recursive-include',
+                    'test',
+                    'run_tests',
+                    'setup_certs.py',
+                    'test_*.py',
+                    'util.py',
+                    '*.txt',
+                ]
+            ),
             'prune test/pki',
         ],
         None,
@@ -405,14 +415,15 @@ def main(argv):
         version=version,
         description='Python bindings for Network Security Services (NSS) and Netscape Portable Runtime (NSPR)',
         long_description=long_description,
+        long_description_content_type='text/x-rst',
         author='John Dennis',
         author_email='jdennis@redhat.com',
-        maintainer='John Dennis',
-        maintainer_email='jdennis@redhat.com',
+        maintainer='Jesse P. Johnson',
+        maintainer_email='jpj6652@gmail.com',
         license='MPLv2.0 or GPLv2+ or LGPLv2+',
         platforms='posix',
         url='http://www.mozilla.org/projects/security/pki/python-nss',
-        download_url='',
+        download_url='https://pypi.org/project/python-nss/',
         ext_modules=[
             nss_error_extension,
             nss_io_extension,
@@ -436,6 +447,37 @@ def main(argv):
                 'source_dir': ('setup.py', 'docs/sphinx/source'),
             }
         },
+        classifiers=[
+            'Development Status :: 5 - Production/Stable',
+            'Environment :: Console',
+            'Intended Audience :: Developers',
+            'Intended Audience :: System Administrators',
+            'License :: OSI Approved :: LGPL License',
+            'License :: OSI Approved :: GPL License',
+            'License :: OSI Approved :: MPL License',
+            # 'Operating System :: MacOS :: MacOS X',
+            # 'Operating System :: Microsoft :: Windows',
+            'Operating System :: POSIX',
+            'Operating System :: POSIX :: Linux',
+            'Operating System :: Unix',
+            'Programming Language :: C',
+            'Programming Language :: Python',
+            'Programming Language :: Python :: 3',
+            'Programming Language :: Python :: 3 :: Only',
+            'Programming Language :: Python :: 3.4',
+            'Programming Language :: Python :: 3.5',
+            'Programming Language :: Python :: 3.6',
+            'Programming Language :: Python :: 3.7',
+            'Programming Language :: Python :: 3.8',
+            'Programming Language :: Python :: 3.9',
+            'Programming Language :: Python :: 3.10',
+            'Programming Language :: Python :: Implementation :: CPython',
+            'Topic :: Software Development',
+            'Topic :: Software Development :: Libraries',
+            'Topic :: Software Development :: Libraries :: Python Modules',
+            'Topic :: Utilities',
+        ],
+        install_requires=['six'],
     )
 
     return 0

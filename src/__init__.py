@@ -248,7 +248,7 @@ Issues
       - One can obtain the osfd in use by NSPR, either when the
         osfd was imported or because NSPR created the osfd itself via:
 
-	- PR_FileDesc2NativeHandle();
+    - PR_FileDesc2NativeHandle();
 
         But note this function is not meant to be public in the NSPR
         API and is documented as being deprecated and carries an
@@ -301,4 +301,4 @@ To be added
 
 """
 
-__version__ = '2.0.0'
+__version__ = '2.0.0.dev0'

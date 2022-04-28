@@ -27,7 +27,7 @@ jobs:
           black --check **/*.py
   build:
     runs-on: ubuntu-latest
-    needs: [version, sca]
+    needs: [sca]
     steps:
       - uses: actions/checkout@v3
       - name: Install base dependencies

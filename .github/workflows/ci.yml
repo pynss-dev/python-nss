@@ -60,7 +60,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Install base dependencies
-        run: apt-get install -y libnss3 libnss3-tools
+        run: sudo apt-get install -y libnss3 libnss3-tools
       - name: "Set up Python ${{ matrix.python-version }}"
         uses: actions/setup-python@v2
         with:

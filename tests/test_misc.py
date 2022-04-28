@@ -5,7 +5,6 @@ import sys
 import unittest
 
 import six
-
 from nss import nss
 
 

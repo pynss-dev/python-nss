@@ -78,6 +78,7 @@ jobs:
           # python -m pip install -r dev-requirements.txt
           python -m pip install --user pipenv
           pipenv install --dev
+          pipenv run pip install dist/python_wheel*linux_x86_64.whl
       # - name: Validate test environment
       #   run: pipenv run bindep --file bindep.txt runtime
       - name: Run test suite

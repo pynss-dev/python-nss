@@ -50,7 +50,7 @@ jobs:
       - name: Download versioned files
         uses: actions/download-artifact@v3
         with:
-          name: dist/python_nss-*-linux_x86_64.whl
+          name: dist
   test:
     runs-on: ubuntu-latest
     needs: build
@@ -68,7 +68,7 @@ jobs:
       - name: Download versioned files
         uses: actions/download-artifact@v3
         with:
-          name: dist/python_nss-*-linux_x86_64.whl
+          name: dist
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip

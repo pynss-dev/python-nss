@@ -46,9 +46,7 @@ jobs:
       - name: Validate build environment
         run: pipenv run bindep --file bindep.txt
       - name: Perform build
-        run: |
-          pipenv run python setup.py bdist_wheel
-          ls -al
+        run: pipenv run python setup.py bdist_wheel
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -74,12 +72,11 @@ jobs:
           name: wheel
       - name: Install dependencies
         run: |
-          ls
           python -m pip install --upgrade pip
           # python -m pip install -r dev-requirements.txt
           python -m pip install --user pipenv
           pipenv install --dev
-          pipenv run pip install dist/python_nss-*-linux_x86_64.whl
+          pipenv run pip install python_nss-*-linux_x86_64.whl
       # - name: Validate test environment
       #   run: pipenv run bindep --file bindep.txt runtime
       - name: Run test suite

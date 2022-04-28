@@ -46,7 +46,9 @@ jobs:
       - name: Validate build environment
         run: pipenv run bindep --file bindep.txt
       - name: Perform build
-        run: pipenv run python setup.py bdist_wheel
+        run: |
+          pipenv run python setup.py bdist_wheel
+          ls -al
       - name: Download versioned files
         uses: actions/download-artifact@v3
         with:

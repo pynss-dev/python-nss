@@ -81,11 +81,11 @@ jobs:
           name: linux-wheel
       - name: Install dependencies
         run: |
-          ls
           python -m pip install --upgrade pip
           python -m pip install --user pipenv
           pipenv install --dev
-          pipenv run pip install "python_nss-*-${{ matrix.python.pyver }}-linux_x86_64.whl"
+          PACKAGE=$(basename "python_nss-*-${{ matrix.python.pyver }}-linux_x86_64.whl")
+          pipenv run pip install "${PACKAGE}"
       # - name: Validate test environment
       #   run: pipenv run bindep --file bindep.txt runtime
       - name: Run test suite

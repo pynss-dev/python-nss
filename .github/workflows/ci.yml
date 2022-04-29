@@ -47,13 +47,14 @@ jobs:
         run: |
           ${{ env.python }} -m pip install --upgrade pip build
           ${{ env.python }} -m pip install --user pipenv
-          ${{ env.python }} -m pipenv install --dev
+          pipenv --python "${{ env.python }}"
+          pipenv install --dev
       - name: Validate build environment
         run: pipenv run bindep --file bindep.txt
       - name: Perform build
         run: |
-          ${{ env.python }} -m pipenv run python setup.py bdist_wheel
-          ${{ env.python }} -m pipenv run python --version
+          pipenv run python setup.py bdist_wheel
+          pipenv run python --version
           ls dist
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
@@ -88,11 +89,12 @@ jobs:
           name: linux-wheel
       - name: Install dependencies
         run: |
+          PACKAGE=$(basename python_nss-*-${{ matrix.python.pyver }}-linux_x86_64.whl)
           ${{ env.python }} -m pip install --upgrade pip
           ${{ env.python }} -m pip install --user pipenv
-          ${{ env.python }} -m pipenv install --dev
-          PACKAGE=$(basename python_nss-*-${{ matrix.python.pyver }}-linux_x86_64.whl)
-          ${{ env.python }} -m pipenv run pip install "${PACKAGE}"
+          pipenv --python "${{ env.python }}"
+          pipenv install --dev
+          pipenv run pip install "${PACKAGE}"
       # - name: Validate test environment
       #   run: pipenv run bindep --file bindep.txt runtime
       - name: Run test suite
@@ -112,8 +114,8 @@ jobs:
           name: wheel
       - name: Install packaging tools
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install twine
+          ${{ env.python }} -m pip install --upgrade pip
+          ${{ env.python }} -m pip install twine
       - name: Publish artifacts
         run: |
           twine upload \

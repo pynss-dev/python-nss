@@ -53,6 +53,7 @@ jobs:
       - name: Perform build
         run: |
           ${{ env.python }} -m pipenv run python setup.py bdist_wheel
+          ${{ env.python }} -m pipenv run python --version
           ls dist
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3

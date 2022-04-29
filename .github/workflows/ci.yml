@@ -40,7 +40,9 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
-        run: ${{ env.python }} -m pip install -r dev-requirements.txt
+        run: |
+          ${{ env.python }} -m pip install --upgrade pip
+          ${{ env.python }} -m pip install -r dev-requirements.txt
       - name: Validate build environment
         run: ${{ env.python }} -m bindep --file bindep.txt
       - name: Perform build
@@ -79,6 +81,7 @@ jobs:
       - name: Install dependencies
         run: |
           PACKAGE=$(basename python_nss-*-${{ matrix.python.pyver }}-linux_x86_64.whl)
+          ${{ env.python }} -m pip install --upgrade pip
           ${{ env.python }} -m pip install -r requirements.txt
           ${{ env.python }} -m pip install "${PACKAGE}"
       # - name: Validate test environment
@@ -99,7 +102,9 @@ jobs:
         with:
           name: wheel
       - name: Install packaging tools
-        run: ${{ env.python }} -m pip install twine
+        run: |
+          ${{ env.python }} -m pip install --upgrade pip
+          ${{ env.python }} -m pip install twine
       - name: Publish artifacts
         run: |
           twine upload \

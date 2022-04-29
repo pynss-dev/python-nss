@@ -29,6 +29,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     needs: [sca]
+    strategy:
+      matrix:
+        python-version: ['3.6', '3.7', '3.8', '3.9', '3.10']
     steps:
       - uses: actions/checkout@v3
       - name: Install base dependencies
@@ -57,7 +60,12 @@ jobs:
     needs: build
     strategy:
       matrix:
-        python-version: ['3.6', '3.7', '3.8', '3.9', '3.10']
+        python-version:
+          - {os: ubuntu-latest,  python-version: '3.6', pyver: py36}
+          - {os: ubuntu-latest,  python-version: '3.7', pyver: py37}
+          - {os: ubuntu-latest,  python-version: '3.8', pyver: py38}
+          - {os: ubuntu-latest,  python-version: '3.9', pyver: py39}
+          - {os: ubuntu-latest,  python-version: '3.10', pyver: py310}
     steps:
       - uses: actions/checkout@v3
       - name: Install base dependencies
@@ -76,7 +84,7 @@ jobs:
           # python -m pip install -r dev-requirements.txt
           python -m pip install --user pipenv
           pipenv install --dev
-          pipenv run pip install python_nss-*-linux_x86_64.whl
+          pipenv run pip install "python_nss-*-${{ matrix.python.pyver }}-linux_x86_64.whl"
       # - name: Validate test environment
       #   run: pipenv run bindep --file bindep.txt runtime
       - name: Run test suite

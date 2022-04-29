@@ -47,12 +47,12 @@ jobs:
         run: |
           ${{ env.python }} -m pip install --upgrade pip build
           ${{ env.python }} -m pip install --user pipenv
-          pipenv install --dev
+          ${{ env.python }} -m pipenv install --dev
       - name: Validate build environment
         run: pipenv run bindep --file bindep.txt
       - name: Perform build
         run: |
-          pipenv run python setup.py bdist_wheel
+          ${{ env.python }} -m pipenv run python setup.py bdist_wheel
           ls dist
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
@@ -89,10 +89,9 @@ jobs:
         run: |
           ${{ env.python }} -m pip install --upgrade pip
           ${{ env.python }} -m pip install --user pipenv
-          pipenv install --dev
+          ${{ env.python }} -m pipenv install --dev
           PACKAGE=$(basename python_nss-*-${{ matrix.python.pyver }}-linux_x86_64.whl)
-          echo "$PACKAGE"
-          pipenv run pip install "${PACKAGE}"
+          ${{ env.python }} -m pipenv run pip install "${PACKAGE}"
       # - name: Validate test environment
       #   run: pipenv run bindep --file bindep.txt runtime
       - name: Run test suite

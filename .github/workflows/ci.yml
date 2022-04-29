@@ -85,6 +85,7 @@ jobs:
           python -m pip install --user pipenv
           pipenv install --dev
           PACKAGE=$(basename "python_nss-*-${{ matrix.python.pyver }}-linux_x86_64.whl")
+          echo "$PACKAGE"
           pipenv run pip install "${PACKAGE}"
       # - name: Validate test environment
       #   run: pipenv run bindep --file bindep.txt runtime

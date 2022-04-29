@@ -4,20 +4,18 @@
 
 import os
 import re
-import subprocess
 import sys
-from distutils import log
-from distutils.command.build_py import build_py as _build_py
-from distutils.command.sdist import sdist as _sdist
-from distutils.core import Command, Extension, setup
-from distutils.filelist import FileList
-from distutils.spawn import find_executable, spawn
-from distutils.util import change_root, subst_vars
+from setuptools import Command, Extension, setup
+from setuptools.command.build_py import build_py
+from setuptools.command.sdist import sdist
+from setuptools._distutils.filelist import FileList
+from setuptools._distutils.spawn import find_executable
+from setuptools._distutils.util import change_root, subst_vars
 
 from sphinx.setup_command import BuildDoc as SphinxBuildDoc
 
 name = 'python-nss'
-version = '2.0.0'
+version = '2.0.0.dev0'
 release = version
 
 doc_manifest = [
@@ -33,20 +31,32 @@ doc_manifest = [
     ],
     [
         [
-            'recursive-include test run_tests setup_certs.py test_*.py util.py *.txt',
+            ' '.join(
+                [
+                    'recursive-include',
+                    'test',
+                    'run_tests',
+                    'setup_certs.py',
+                    'test_*.py',
+                    'util.py',
+                    '*.txt',
+                ]
+            ),
             'prune test/pki',
         ],
         None,
         None,
     ],
     [
-        [
-            'recursive-include lib *.py *.txt',
-        ],
+        ['recursive-include lib *.py *.txt'],
         [('^lib/', '')],
         'examples',
     ],
-    [['recursive-include build/sphinx/html *'], [('^build/sphinx/', 'api/')], None],
+    [
+        ['recursive-include build/sphinx/html *'],
+        [('^build/sphinx/', 'api/')],
+        None,
+    ],
 ]
 
 
@@ -59,10 +69,10 @@ def update_version():
 
     version_file = 'src/__init__.py'
     tmp_file = 'src/__init__.tmp'
-    version_re = re.compile("^\s*__version__\s*=\s*['\"]([^'\"]*)['\"]")
+    version_re = re.compile(r'^\s*__version__\s*=\s*[\'"]([^\'"]*)[\'"]')
     need_to_update = False
     version_found = False
-    with open(tmp_file, "w") as t:
+    with open(tmp_file, 'w') as t:
         with open(version_file) as v:
             for line in v.readlines():
                 match = version_re.search(line)
@@ -71,15 +81,15 @@ def update_version():
                     file_version = match.group(1)
                     if file_version != version:
                         need_to_update = True
-                        t.write("__version__ = '%s'\n" % version)
+                        t.write(f"__version__ = '{version}")
                 else:
                     t.write(line)
         if not version_found:
             need_to_update = True
-            t.write("__version__ = '%s'\n" % version)
+            t.write(f"__version__ = '{version}'")
 
     if need_to_update:
-        print("Updating version in \"%s\" to \"%s\"" % (version_file, version))
+        print(f"Updating version in '{version_file}', to '{version}'")
         os.rename(tmp_file, version_file)
     else:
         os.unlink(tmp_file)
@@ -87,19 +97,20 @@ def update_version():
 
 def find_include_dir(dir_names, include_files, include_roots=None):
     """
-    Locate an include directory on the system which contains the specified include files.
-    You must provide a list of directory basenames to search. You may optionally provide
-    a list of include roots. The search proceeds by iterating over each root and appending
-    each directory basename to it. If the resulting directory path contains all the include
-    files that directory is returned. If no directory is found containing all the include
-    files a ValueError is raised.
+    Locate an include directory on the system which contains the specified
+    include files. You must provide a list of directory basenames to search.
+    You may optionally provide a list of include roots. The search proceeds by
+    iterating over each root and appending each directory basename to it. If
+    the resulting directory path contains all the include files that directory
+    is returned. If no directory is found containing all the include files a
+    ValueError is raised.
     """
     if not include_roots:
         include_roots = ['/usr/include', '/usr/local/include']
     if len(dir_names) == 0:
-        raise ValueError("directory search list is empty")
+        raise ValueError('directory search list is empty')
     if len(include_files) == 0:
-        raise ValueError("header file list is empty")
+        raise ValueError('header file list is empty')
     for include_root in include_roots:
         for dir_name in dir_names:
             include_dir = os.path.join(include_root, dir_name)
@@ -113,30 +124,31 @@ def find_include_dir(dir_names, include_files, include_roots=None):
                 if found:
                     return include_dir
     raise ValueError(
-        "unable to locate include directory containing header files %s" % include_files
+        'unable to locate include directory containing header files %s'
+        % include_files
     )
 
 
-class BuildPy(_build_py):
+class BuildPy(build_py):
     """Specialized Python source builder."""
 
     def run(self):
         update_version()
-        _build_py.run(self)
+        build_py.run(self)
 
 
-class SDist(_sdist):
+class SDist(sdist):
     """Specialized Python source builder."""
 
     def run(self):
         update_version()
-        _sdist.run(self)
+        sdist.run(self)
 
 
 class BuildDoc(Command):
     description = 'generate documentation'
     user_options = [
-        ('docdir=', 'd', "directory root for documentation"),
+        ('docdir=', 'd', 'directory root for documentation'),
     ]
 
     def has_sphinx(self):
@@ -175,9 +187,17 @@ class BuildDoc(Command):
 class InstallDoc(Command):
     description = 'install documentation'
     user_options = [
-        ('docdir=', 'd', "directory root for documentation"),
-        ('root=', None, "install everything relative to this alternate root directory"),
-        ('skip-build', None, "skip rebuilding everything (for testing/debugging)"),
+        ('docdir=', 'd', 'directory root for documentation'),
+        (
+            'root=',
+            None,
+            'install everything relative to this alternate root directory',
+        ),
+        (
+            'skip-build',
+            None,
+            'skip rebuilding everything (for testing/debugging)',
+        ),
     ]
 
     def initialize_options(self):
@@ -199,7 +219,9 @@ class InstallDoc(Command):
 
         dst_root = change_root(self.root, self.docdir)
         self.copy_transformed_tree(
-            doc_manifest, dst_root=dst_root, substitutions={'docdir': self.docdir}
+            doc_manifest,
+            dst_root=dst_root,
+            substitutions={'docdir': self.docdir},
         )
 
     def copy_transformed_tree(
@@ -255,12 +277,14 @@ class InstallDoc(Command):
 
         Copy all text files in build/doc to doc:
 
-            copy_transformed_tree([[["include build/doc *.txt"], None, 'doc']])
+            copy_transformed_tree([[['include build/doc *.txt'], None, 'doc']])
 
-        Copy all html files found under build to docs/html and change the extension from
-        .html to .htm
+        Copy all html files found under build to docs/html and change the
+        extension from .html to .htm
 
-            copy_transformed_tree([[["include build *.html"], [('\.html$','.htm')], 'doc']])
+            copy_transformed_tree(
+                [[['include build *.html'], [('\\.html$','.htm')], 'doc']]
+            )
 
         """
         if src_root is not None:
@@ -310,11 +334,11 @@ def main(argv):
 
     for arg in argv[:]:
         if arg in ('--debug',):
-            print("compiling with debug")
+            print('compiling with debug')
             extra_compile_args += debug_compile_args
             argv.remove(arg)
         if arg in ('-t', '--trace'):
-            print("compiling with trace")
+            print('compiling with trace')
             extra_compile_args += ['-DDEBUG']
             argv.remove(arg)
         if arg.startswith('--include-root'):
@@ -347,7 +371,11 @@ def main(argv):
         'nss.io',
         sources=['src/py_nspr_io.c'],
         include_dirs=[nss_include_dir, nspr_include_dir],
-        depends=['src/py_nspr_common.h', 'src/py_nspr_error.h', 'src/py_nspr_io.h'],
+        depends=[
+            'src/py_nspr_common.h',
+            'src/py_nspr_error.h',
+            'src/py_nspr_io.h',
+        ],
         libraries=['nspr4'],
         extra_compile_args=extra_compile_args,
     )
@@ -356,7 +384,11 @@ def main(argv):
         'nss.nss',
         sources=['src/py_nss.c'],
         include_dirs=['src', nss_include_dir, nspr_include_dir],
-        depends=['src/py_nspr_common.h', 'src/py_nspr_error.h', 'src/py_nss.h'],
+        depends=[
+            'src/py_nspr_common.h',
+            'src/py_nspr_error.h',
+            'src/py_nss.h',
+        ],
         libraries=['nspr4', 'ssl3', 'nss3', 'smime3'],
         extra_compile_args=extra_compile_args,
     )
@@ -383,14 +415,15 @@ def main(argv):
         version=version,
         description='Python bindings for Network Security Services (NSS) and Netscape Portable Runtime (NSPR)',
         long_description=long_description,
+        long_description_content_type='text/x-rst',
         author='John Dennis',
         author_email='jdennis@redhat.com',
-        maintainer='John Dennis',
-        maintainer_email='jdennis@redhat.com',
+        maintainer='Jesse P. Johnson',
+        maintainer_email='jpj6652@gmail.com',
         license='MPLv2.0 or GPLv2+ or LGPLv2+',
         platforms='posix',
         url='http://www.mozilla.org/projects/security/pki/python-nss',
-        download_url='',
+        download_url='https://pypi.org/project/python-nss/',
         ext_modules=[
             nss_error_extension,
             nss_io_extension,
@@ -414,10 +447,41 @@ def main(argv):
                 'source_dir': ('setup.py', 'docs/sphinx/source'),
             }
         },
+        classifiers=[
+            'Development Status :: 5 - Production/Stable',
+            'Environment :: Console',
+            'Intended Audience :: Developers',
+            'Intended Audience :: System Administrators',
+            'License :: OSI Approved :: LGPL License',
+            'License :: OSI Approved :: GPL License',
+            'License :: OSI Approved :: MPL License',
+            # 'Operating System :: MacOS :: MacOS X',
+            # 'Operating System :: Microsoft :: Windows',
+            'Operating System :: POSIX',
+            'Operating System :: POSIX :: Linux',
+            'Operating System :: Unix',
+            'Programming Language :: C',
+            'Programming Language :: Python',
+            'Programming Language :: Python :: 3',
+            'Programming Language :: Python :: 3 :: Only',
+            'Programming Language :: Python :: 3.4',
+            'Programming Language :: Python :: 3.5',
+            'Programming Language :: Python :: 3.6',
+            'Programming Language :: Python :: 3.7',
+            'Programming Language :: Python :: 3.8',
+            'Programming Language :: Python :: 3.9',
+            'Programming Language :: Python :: 3.10',
+            'Programming Language :: Python :: Implementation :: CPython',
+            'Topic :: Software Development',
+            'Topic :: Software Development :: Libraries',
+            'Topic :: Software Development :: Libraries :: Python Modules',
+            'Topic :: Utilities',
+        ],
+        install_requires=['six'],
     )
 
     return 0
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     sys.exit(main(sys.argv))

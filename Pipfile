@@ -21,6 +21,7 @@ flawfinder = "*"
 
 [scripts]
 check-env = "bindep"
-clean = "rm -rf build/ dist/ pki/ python_nss.egg-info/"
-build = "python setup.py bdist_wheel --universal"
 format = "isort . && black **/*.py"
+build = "python setup.py bdist_wheel --universal"
+tests = "./tests/run_tests.py"
+clean = "rm -rf build/ dist/ pki/ python_nss.egg-info/"

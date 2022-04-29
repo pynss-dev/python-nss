@@ -9,7 +9,6 @@
 # requirements. To emit only development requirements, pass "--dev-only".
 
 -i https://pypi.org/simple
--r requirements.txt
 alabaster==0.7.12
 babel==2.10.1; python_version >= '3.6'
 bindep==2.11.0

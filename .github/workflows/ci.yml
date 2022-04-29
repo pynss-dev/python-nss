@@ -45,8 +45,8 @@ jobs:
           cache: pipenv
       - name: Install dependencies
         run: |
-          "${{ env.python }} -m pip install --upgrade pip build"
-          "${{ env.python }} -m pip install --user pipenv"
+          ${{ env.python }} -m pip install --upgrade pip build
+          ${{ env.python }} -m pip install --user pipenv
           pipenv install --dev
       - name: Validate build environment
         run: pipenv run bindep --file bindep.txt
@@ -87,8 +87,8 @@ jobs:
           name: linux-wheel
       - name: Install dependencies
         run: |
-          "${{ env.python }} -m pip install --upgrade pip"
-          "${{ env.python }} -m pip install --user pipenv"
+          ${{ env.python }} -m pip install --upgrade pip
+          ${{ env.python }} -m pip install --user pipenv
           pipenv install --dev
           PACKAGE=$(basename python_nss-*-${{ matrix.python.pyver }}-linux_x86_64.whl)
           echo "$PACKAGE"

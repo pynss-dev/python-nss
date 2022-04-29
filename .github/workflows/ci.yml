@@ -28,7 +28,7 @@ jobs:
     needs: [sca]
     strategy:
       matrix:
-        python-version: ['3.6', '3.7', '3.8', '3.9', '3.10']
+        python-version: ['3.7', '3.8', '3.9', '3.10']
     env:
       python: python${{ matrix.python-version }}
     steps:
@@ -58,7 +58,6 @@ jobs:
     strategy:
       matrix:
         python:
-          - {os: ubuntu-latest, version: '3.6', pyver: cp36}
           - {os: ubuntu-latest, version: '3.7', pyver: cp37}
           - {os: ubuntu-latest, version: '3.8', pyver: cp38}
           - {os: ubuntu-latest, version: '3.9', pyver: cp39}

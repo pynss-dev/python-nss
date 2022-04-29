@@ -49,7 +49,9 @@ jobs:
       - name: Validate build environment
         run: pipenv run bindep --file bindep.txt
       - name: Perform build
-        run: pipenv run python setup.py bdist_wheel
+        run: |
+          pipenv run python setup.py bdist_wheel
+          ls dist
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -81,6 +83,7 @@ jobs:
           name: linux-wheel
       - name: Install dependencies
         run: |
+          ls
           python -m pip install --upgrade pip
           python -m pip install --user pipenv
           pipenv install --dev

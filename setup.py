@@ -15,7 +15,7 @@ from setuptools._distutils.util import change_root, subst_vars
 from sphinx.setup_command import BuildDoc as SphinxBuildDoc
 
 name = 'python-nss'
-version = '2.0.0.dev0'
+version = '2.0.0.dev1'
 release = version
 
 doc_manifest = [

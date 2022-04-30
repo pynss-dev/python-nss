@@ -39,6 +39,8 @@ jobs:
       - name: Run build
         run: |
           docker run \
+          --env DEBIAN_FRONTEND=noninteractive \
+          --env DEBCONF_NONINTERACTIVE_SEEN=true \
           --rm \
           --volume ${{ github.workspace }}:/io:rw \
           --workdir /io \

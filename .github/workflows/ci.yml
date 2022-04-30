@@ -47,7 +47,10 @@ jobs:
             && apt install -y software-properties-common \
             && add-apt-repository ppa:deadsnakes/ppa \
             && apt install -y libnss3 libnss3-dev libnss3-tools gcc \
-            && apt install -y ${{ env.python }} ${{ env.python }}-venv \
+            && apt install -y \
+              ${{ env.python }} \
+              ${{ env.python }}-dev \
+              ${{ env.python }}-venv \
             && ${{ env.python }} -m venv .env \
             && source .env/bin/activate \
             && pip install --upgrade pip wheel sphinx setuptools \

@@ -44,6 +44,8 @@ jobs:
           --workdir /io \
           arm64v8/ubuntu \
           bash -exc "apt-get update \
+            && apt install software-properties-common \
+            && add-apt-repository ppa:deadsnakes/ppa \
             && apt install -y libnss3 libnss3-dev libnss3-tools gcc \
             && apt install -y python${{ matrix.python-version }} \
             && apt install -y python${{ matrix.python-version }}-venv \

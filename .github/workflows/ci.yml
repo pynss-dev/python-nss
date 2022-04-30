@@ -33,22 +33,27 @@ jobs:
       python: python${{ matrix.python-version }}
     steps:
       - uses: actions/checkout@v3
-      - name: Install base dependencies
-        run: sudo apt-get install -y libnss3 libnss3-dev libnss3-tools gcc
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
+      - name: Set up QEMU
+        id: qemu
+        uses: docker/setup-qemu-action@v1
+      - name: Test with tox
         run: |
-          ${{ env.python }} -m pip install --upgrade pip setuptools
-          ${{ env.python }} -m pip install -r dev-requirements.txt
-      - name: Validate build environment
-        run: ${{ env.python }} -m bindep --file bindep.txt
-      - name: Perform build
-        run: |
-          ${{ env.python }} setup.py bdist_wheel
-          ${{ env.python }} --version
+          docker run \
+          --rm \
+          --volume ${{ github.workspace }}:/io:rw \
+          --workdir /io \
+          arm64v8/ubuntu \
+          bash -exc "apt-get update \
+            && apt install -y libnss3 libnss3-dev libnss3-tools gcc \
+            && apt install -y ${{ matrix.python-version }} \
+            && apt install -y ${{ matrix.python-version }}-venv \
+            && ${{ matrix.python-version }} -m venv .env \
+            && source .env/bin/activate \
+            && pip install --upgrade pip setuptools \
+            && pip install -r dev-requirements.txt \
+            && bindep --file bindep.txt \
+            && python setup.py bdist_wheel \
+            && deactivate"
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -81,7 +86,7 @@ jobs:
       - name: Install dependencies
         run: |
           ls -al
-          PACKAGE=$(basename python_nss-*-${{ matrix.python.pyver }}*linux_x86_64.whl)
+          PACKAGE=$(basename python_nss-*${{ matrix.python.pyver }}*-linux_x86_64.whl)
           ${{ env.python }} -m pip install --upgrade pip setuptools
           ${{ env.python }} -m pip install -r requirements.txt
           ${{ env.python }} -m pip install "${PACKAGE}"

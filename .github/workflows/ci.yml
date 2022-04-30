@@ -46,8 +46,11 @@ jobs:
           bash -exc "apt-get update \
             && apt install -y software-properties-common \
             && add-apt-repository ppa:deadsnakes/ppa \
-            && apt install -y libnss3 libnss3-dev libnss3-tools gcc \
             && apt install -y \
+              gcc \
+              libnss3 \
+              libnss3-dev \
+              libnss3-tools \
               ${{ env.python }} \
               ${{ env.python }}-dev \
               ${{ env.python }}-venv \

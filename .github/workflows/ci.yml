@@ -36,7 +36,7 @@ jobs:
       - name: Set up QEMU
         id: qemu
         uses: docker/setup-qemu-action@v1
-      - name: Test with tox
+      - name: Run build
         run: |
           docker run \
           --rm \
@@ -45,8 +45,8 @@ jobs:
           arm64v8/ubuntu \
           bash -exc "apt-get update \
             && apt install -y libnss3 libnss3-dev libnss3-tools gcc \
-            && apt install -y ${{ matrix.python-version }} \
-            && apt install -y ${{ matrix.python-version }}-venv \
+            && apt install -y python${{ matrix.python-version }} \
+            && apt install -y python${{ matrix.python-version }}-venv \
             && ${{ matrix.python-version }} -m venv .env \
             && source .env/bin/activate \
             && pip install --upgrade pip setuptools \

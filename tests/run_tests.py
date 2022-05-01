@@ -43,9 +43,7 @@ def run_tests():
 
 def main():
     """Provide main entrypoint for test execution."""
-    parser = argparse.ArgumentParser(
-        description='run the units (installed or in tree)'
-    )
+    parser = argparse.ArgumentParser(description='run the units (installed or in tree)')
     parser.add_argument(
         '-i',
         '--installed',
@@ -74,10 +72,7 @@ def main():
 
         build_dir = get_build_dir()
         if build_dir and os.path.exists(build_dir):
-            print(
-                "Using local libraries from tree, located here:\n%s\n"
-                % build_dir
-            )
+            print("Using local libraries from tree, located here:\n%s\n" % build_dir)
             sys.path.insert(0, build_dir)
         else:
             print('ERROR: Unable to locate in tree libraries', file=sys.stderr)

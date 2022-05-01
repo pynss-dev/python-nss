@@ -31,9 +31,7 @@ def setup_contexts(mechanism, key, iv):
     else:
         if verbose:
             print('generating key data')
-        sym_key = slot.key_gen(
-            mechanism, None, slot.get_best_key_length(mechanism)
-        )
+        sym_key = slot.key_gen(mechanism, None, slot.get_best_key_length(mechanism))
 
     # If initialization vector was supplied use it, otherwise set it to None
     if iv:
@@ -72,9 +70,7 @@ def setup_contexts(mechanism, key, iv):
 class TestCipher(unittest.TestCase):
     def setUp(self):
         nss.nss_init_nodb()
-        self.encoding_ctx, self.decoding_ctx = setup_contexts(
-            mechanism, key, iv
-        )
+        self.encoding_ctx, self.decoding_ctx = setup_contexts(mechanism, key, iv)
 
     def tearDown(self):
         del self.encoding_ctx
@@ -92,10 +88,7 @@ class TestCipher(unittest.TestCase):
         cipher_text += self.encoding_ctx.digest_final()
 
         if verbose:
-            print(
-                "Cipher Text:\n%s"
-                % (nss.data_to_hex(cipher_text, separator=':'))
-            )
+            print("Cipher Text:\n%s" % (nss.data_to_hex(cipher_text, separator=':')))
 
         # Decode the cipher text by feeding it to cipher_op getting plain text
         # back.
@@ -120,10 +113,7 @@ class TestCipher(unittest.TestCase):
         encrypted_file = open(encrypted_filename, 'wb')
 
         if verbose:
-            print(
-                "Encrypting file '%s' to '%s'"
-                % (in_filename, encrypted_filename)
-            )
+            print("Encrypting file '%s' to '%s'" % (in_filename, encrypted_filename))
 
         # Encode the data read from a file in chunks
         while True:

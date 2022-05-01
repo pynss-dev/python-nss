@@ -25,9 +25,7 @@ MODUTIL = shutil.which('modutil')
 
 
 class CmdError(Exception):
-    def __init__(
-        self, cmd_args, returncode, message=None, stdout=None, stderr=None
-    ):
+    def __init__(self, cmd_args, returncode, message=None, stdout=None, stderr=None):
         self.cmd_args = cmd_args
         self.returncode = returncode
         if message is None:
@@ -155,9 +153,7 @@ def format_cert(options, nickname):
 
 def create_database(options):
     if os.path.exists(options.db_dir) and not os.path.isdir(options.db_dir):
-        raise ValueError(
-            'db_dir "%s" exists but is not a directory' % options.db_dir
-        )
+        raise ValueError('db_dir "%s" exists but is not a directory' % options.db_dir)
 
     # Create resources
     create_passwd_file(options)
@@ -386,9 +382,7 @@ def create_client_cert(options):
 def add_trusted_certs(options):
     name = 'ca_certs'
     module = os.path.join(os.sep, 'usr', 'lib64', 'libnssckbi.so')
-    logging.info(
-        'adding system trusted certs: name="%s" module="%s"', name, module
-    )
+    logging.info('adding system trusted certs: name="%s" module="%s"', name, module)
 
     cmd_args = [
         MODUTIL,
@@ -525,9 +519,7 @@ def setup_certs(args):
 
     parser.add_argument('--hostname', help='hostname used in cert subjects')
 
-    parser.add_argument(
-        '--db-type', choices=['sql', ''], help='NSS database type'
-    )
+    parser.add_argument('--db-type', choices=['sql', ''], help='NSS database type')
 
     parser.add_argument('--db-dir', help='NSS database directory')
 
@@ -539,9 +531,7 @@ def setup_certs(args):
 
     parser.add_argument('--server-subject', help='server certificate subject')
 
-    parser.add_argument(
-        '--server-nickname', help='server certificate nickname'
-    )
+    parser.add_argument('--server-nickname', help='server certificate nickname')
 
     parser.add_argument(
         '--client-username',
@@ -550,9 +540,7 @@ def setup_certs(args):
 
     parser.add_argument('--client-subject', help='client certificate subject')
 
-    parser.add_argument(
-        '--client-nickname', help='client certificate nickname'
-    )
+    parser.add_argument('--client-nickname', help='client certificate nickname')
 
     parser.add_argument(
         '--serial-number',

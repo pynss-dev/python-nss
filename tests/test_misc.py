@@ -35,9 +35,7 @@ class TestShutdownCallback(unittest.TestCase):
             return True
 
         nss.nss_init_nodb()
-        nss.set_shutdown_callback(
-            shutdown_callback, int_value, str_value, dict_value
-        )
+        nss.set_shutdown_callback(shutdown_callback, int_value, str_value, dict_value)
         nss.nss_shutdown()
         self.assertEqual(dict_value['count'], count + 1)
 
@@ -48,9 +46,7 @@ class TestShutdownCallback(unittest.TestCase):
 
         # Callback should not be invoked if cleared
         nss.nss_init_nodb()
-        nss.set_shutdown_callback(
-            shutdown_callback, int_value, str_value, dict_value
-        )
+        nss.set_shutdown_callback(shutdown_callback, int_value, str_value, dict_value)
         nss.set_shutdown_callback(None)
         nss.nss_shutdown()
         self.assertEqual(dict_value['count'], count + 1)

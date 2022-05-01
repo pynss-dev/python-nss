@@ -116,7 +116,7 @@ jobs:
       - name: Download versioned files
         uses: actions/download-artifact@v3
         with:
-          name: wheel
+          name: linux-wheel
       - name: Install packaging tools
         run: |
           ${{ env.python }} -m pip install --upgrade pip setuptools
@@ -128,4 +128,4 @@ jobs:
             --repository 'https://test.pypi.org/legacy/' \
             --username __token__ \
             --password '${{ secrets.TESTPYPI_TOKEN }}' \
-            ./
+            ./python_nss*.whl

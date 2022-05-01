@@ -119,8 +119,8 @@ jobs:
           name: linux-wheel
       - name: Install packaging tools
         run: |
-          ${{ env.python }} -m pip install --upgrade pip setuptools
-          ${{ env.python }} -m pip install twine
+          python -m pip install --upgrade pip setuptools
+          python -m pip install twine
       - name: Publish artifacts
         run: |
           twine upload \

@@ -34,7 +34,7 @@ jobs:
           - {os: ubuntu-latest, version: '3.8', pyver: cp38}
           - {os: ubuntu-latest, version: '3.9', pyver: cp39}
     env:
-      python: python${{ matrix.version }}
+      python: python${{ matrix.python.version }}
     steps:
       - uses: actions/checkout@v3
       - name: Set up QEMU
@@ -43,23 +43,23 @@ jobs:
       - name: Run build
         run: |
           docker run \
-          --rm \
-          --volume ${{ github.workspace }}:/io:rw \
-          --workdir /io \
-          quay.io/pypa/manylinux2014_x86_64:latest \
-          bash -exc "yum update-minimal --security -y \
-            && yum install -y \
-              gcc \
-              nss \
-              nss-devel \
-              nss-tools \
-              nspr-devel \
-            && ${{ env.python }} -m venv .env \
-            && source .env/bin/activate \
-            && pip install -U pip wheel sphinx setuptools \
-            && pip install -r requirements.txt \
-            && python setup.py bdist_wheel \
-            && deactivate"
+            --rm \
+            --volume ${{ github.workspace }}:/io:rw \
+            --workdir /io \
+            quay.io/pypa/manylinux2014_x86_64:latest \
+            bash -exc "yum update-minimal --security -y \
+              && yum install -y \
+                gcc \
+                nss \
+                nss-devel \
+                nss-tools \
+                nspr-devel \
+              && ${{ env.python }} -m venv .env \
+              && source .env/bin/activate \
+              && pip install -U pip wheel sphinx setuptools \
+              && pip install -r requirements.txt \
+              && python setup.py bdist_wheel \
+              && deactivate"
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -121,8 +121,8 @@ jobs:
       - name: Publish artifacts
         run: |
           twine upload \
-          --non-interactive \
-          --skip-existing \
-          --repository 'https://test.pypi.org/legacy/' \
-          --username __token__ \
-          --password '${{ secrets.TESTPYPI_TOKEN }}'
+            --non-interactive \
+            --skip-existing \
+            --repository 'https://test.pypi.org/legacy/' \
+            --username __token__ \
+            --password '${{ secrets.TESTPYPI_TOKEN }}'

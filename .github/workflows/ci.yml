@@ -83,7 +83,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Install base dependencies
-        run: sudo apt-get install -y libnss3-dev libnss3-tools libnspr4-dev
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libnss3-dev libnss3-tools libnspr4-dev
       - name: Set up Python ${{ matrix.python.version }}
         uses: actions/setup-python@v2
         with:

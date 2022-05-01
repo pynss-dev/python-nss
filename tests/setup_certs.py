@@ -9,7 +9,6 @@ import shutil
 import subprocess
 import sys
 import tempfile
-import unittest
 from string import Template
 
 import six
@@ -25,14 +24,16 @@ MODUTIL = shutil.which('modutil')
 
 
 class CmdError(Exception):
-    def __init__(self, cmd_args, returncode, message=None, stdout=None, stderr=None):
+    def __init__(
+        self, cmd_args, returncode, message=None, stdout=None, stderr=None
+    ):
         self.cmd_args = cmd_args
         self.returncode = returncode
         if message is None:
-            self.message = 'Failed error=%s, ' % (returncode)
+            self.message = "Failed error=%s, " % (returncode)
             if stderr:
-                self.message += '"%s", ' % stderr
-            self.message += 'args=%s' % (cmd_args)
+                self.message += "'%s', " % stderr
+            self.message += "args=%s" % (cmd_args)
         else:
             self.message = message
         self.stdout = stdout
@@ -58,7 +59,7 @@ def run_cmd(cmd_args, input=None):
             raise CmdError(
                 cmd_args,
                 returncode,
-                'failed %s' % (' '.join(cmd_args)),
+                "failed %s" % (' '.join(cmd_args)),
                 stdout,
                 stderr,
             )
@@ -71,11 +72,11 @@ def exit_handler(options):
     logging.debug('in exit handler')
 
     if options.passwd_filename is not None:
-        logging.debug('removing passwd_filename=%s', options.passwd_filename)
+        logging.debug("removing passwd_filename=%s", options.passwd_filename)
         os.remove(options.passwd_filename)
 
     if options.noise_filename is not None:
-        logging.debug('removing noise_filename=%s', options.noise_filename)
+        logging.debug("removing noise_filename=%s", options.noise_filename)
         os.remove(options.noise_filename)
 
 
@@ -153,13 +154,15 @@ def format_cert(options, nickname):
 
 def create_database(options):
     if os.path.exists(options.db_dir) and not os.path.isdir(options.db_dir):
-        raise ValueError('db_dir "%s" exists but is not a directory' % options.db_dir)
+        raise ValueError(
+            "db_dir '%s' exists but is not a directory" % options.db_dir
+        )
 
     # Create resources
     create_passwd_file(options)
 
     if options.clean:
-        logging.info('Creating clean database directory: "%s"', options.db_dir)
+        logging.info("Creating clean database directory: '%s'", options.db_dir)
 
         if os.path.exists(options.db_dir):
             shutil.rmtree(options.db_dir)
@@ -176,7 +179,7 @@ def create_database(options):
 
         stdout, stderr = run_cmd(cmd_args)
     else:
-        logging.info('Using existing database directory: "%s"', options.db_dir)
+        logging.info("Using existing database directory: '%s'", options.db_dir)
 
 
 def create_ca_cert(options):
@@ -184,7 +187,7 @@ def create_ca_cert(options):
     init_noise_file(options)
 
     logging.info(
-        'creating ca cert: subject="%s", nickname="%s"',
+        "creating ca cert: subject='%s', nickname='%s'",
         options.ca_subject,
         options.ca_nickname,
     )
@@ -266,7 +269,7 @@ def create_server_cert(options):
     init_noise_file(options)
 
     logging.info(
-        'creating server cert: subject="%s", nickname="%s"',
+        "creating server cert: subject='%s', nickname='%s'",
         options.server_subject,
         options.server_nickname,
     )
@@ -325,7 +328,7 @@ def create_client_cert(options):
     init_noise_file(options)
 
     logging.info(
-        'creating client cert: subject="%s", nickname="%s"',
+        "creating client cert: subject='%s', nickname='%s'",
         options.client_subject,
         options.client_nickname,
     )
@@ -381,8 +384,17 @@ def create_client_cert(options):
 
 def add_trusted_certs(options):
     name = 'ca_certs'
-    module = os.path.join(os.sep, 'usr', 'lib64', 'libnssckbi.so')
-    logging.info('adding system trusted certs: name="%s" module="%s"', name, module)
+    x86_64_multiarch_dir = os.path.join(
+        os.sep, 'usr', 'lib', 'x86_64-linux-gnu'
+    )
+    if os.path.isdir(x86_64_multiarch_dir):
+        basedir = x86_64_multiarch_dir
+    else:
+        basedir = os.path.join(os.sep, 'usr', 'lib64')
+    module = os.path.join(basedir, 'libnssckbi.so')
+    logging.info(
+        "adding system trusted certs: name='%s' module='%s'", name, module
+    )
 
     cmd_args = [
         MODUTIL,
@@ -403,7 +415,7 @@ def parse_fips_enabled(string):
         return False
     if re.search('FIPS mode enabled', string):
         return True
-    raise ValueError('unknown fips enabled string: "%s"' % string)
+    raise ValueError("unknown fips enabled string: '%s'" % string)
 
 
 def get_system_fips_enabled():
@@ -447,11 +459,11 @@ def set_fips_mode(options):
         state = 'true'
     else:
         if get_system_fips_enabled():
-            logger.warning("System FIPS enabled, cannot disable FIPS")
+            logger.warning('System FIPS enabled, cannot disable FIPS')
             return
         state = 'false'
 
-    logging.info('setting fips: %s', state)
+    logging.info("setting fips: %s", state)
 
     cmd_args = [
         MODUTIL,
@@ -519,7 +531,9 @@ def setup_certs(args):
 
     parser.add_argument('--hostname', help='hostname used in cert subjects')
 
-    parser.add_argument('--db-type', choices=['sql', ''], help='NSS database type')
+    parser.add_argument(
+        '--db-type', choices=['sql', ''], help='NSS database type'
+    )
 
     parser.add_argument('--db-dir', help='NSS database directory')
 
@@ -531,7 +545,9 @@ def setup_certs(args):
 
     parser.add_argument('--server-subject', help='server certificate subject')
 
-    parser.add_argument('--server-nickname', help='server certificate nickname')
+    parser.add_argument(
+        '--server-nickname', help='server certificate nickname'
+    )
 
     parser.add_argument(
         '--client-username',
@@ -540,7 +556,9 @@ def setup_certs(args):
 
     parser.add_argument('--client-subject', help='client certificate subject')
 
-    parser.add_argument('--client-nickname', help='client certificate nickname')
+    parser.add_argument(
+        '--client-nickname', help='client certificate nickname'
+    )
 
     parser.add_argument(
         '--serial-number',
@@ -675,31 +693,31 @@ def setup_certs(args):
             logger.setLevel(logging.INFO)
         for nickname in cert_nicknames:
             logging.info(
-                'Certificate nickname "%s"\n%s',
+                "Certificate nickname '%s'\n%s",
                 nickname,
                 format_cert(options, nickname),
             )
 
     logging.info('---------- Summary ----------')
     logging.info(
-        'NSS database name="%s", password="%s"',
+        "NSS database name='%s', password='%s'",
         options.db_name,
         options.db_passwd,
     )
-    logging.info('system FIPS mode=%s', get_system_fips_enabled())
-    logging.info('DB FIPS mode=%s', get_db_fips_enabled(options.db_name))
+    logging.info("system FIPS mode=%s", get_system_fips_enabled())
+    logging.info("DB FIPS mode=%s", get_db_fips_enabled(options.db_name))
     logging.info(
-        'CA nickname="%s", CA subject="%s"',
+        "CA nickname='%s', CA subject='%s'",
         options.ca_nickname,
         options.ca_subject,
     )
     logging.info(
-        'server nickname="%s", server subject="%s"',
+        "server nickname='%s', server subject='%s'",
         options.server_nickname,
         options.server_subject,
     )
     logging.info(
-        'client nickname="%s", client subject="%s"',
+        "client nickname='%s', client subject='%s'",
         options.client_nickname,
         options.client_subject,
     )

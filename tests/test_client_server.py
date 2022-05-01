@@ -82,7 +82,9 @@ def auth_certificate_callback(sock, check_sig, is_server, certdb):
         # attribute will be set to the error code matching the reason why the
         # validation failed and the strerror attribute will contain a string
         # describing the reason.
-        approved_usage = cert.verify_now(certdb, check_sig, intended_usage, *pin_args)
+        approved_usage = cert.verify_now(
+            certdb, check_sig, intended_usage, *pin_args
+        )
     except Exception as err:
         print("auth_certificate_callback: %s" % err, file=sys.stderr)
         cert_is_valid = False
@@ -91,7 +93,10 @@ def auth_certificate_callback(sock, check_sig, is_server, certdb):
         return cert_is_valid
 
     if verbose:
-        print("approved_usage = %s" % ', '.join(nss.cert_usage_flags(approved_usage)))
+        print(
+            "approved_usage = %s"
+            % ', '.join(nss.cert_usage_flags(approved_usage))
+        )
 
     # Is the intended usage a proper subset of the approved usage
     if approved_usage & intended_usage:
@@ -144,7 +149,9 @@ def client_auth_data_callback(ca_names, chosen_nickname, password, certdb):
             print("client_auth_data_callback: %s" % err, file=sys.stderr)
             return False
     else:
-        nicknames = nss.get_cert_nicknames(certdb, cert.SEC_CERT_NICKNAMES_USER)
+        nicknames = nss.get_cert_nicknames(
+            certdb, cert.SEC_CERT_NICKNAMES_USER
+        )
         for nickname in nicknames:
             try:
                 cert = nss.find_cert_from_nickname(nickname, password)
@@ -213,7 +220,9 @@ def client(request):
         try:
             if verbose:
                 print("client trying connection to: %s" % (net_addr))
-            sock.connect(net_addr, timeout=io.seconds_to_interval(timeout_secs))
+            sock.connect(
+                net_addr, timeout=io.seconds_to_interval(timeout_secs)
+            )
             if verbose:
                 print("client connected to: %s" % (net_addr))
             break
@@ -334,7 +343,9 @@ def server():
         while True:
             try:
                 # Handle the client connection
-                buf = client_sock.readline()  # newline is protocol record separator
+                buf = (
+                    client_sock.readline()
+                )  # newline is protocol record separator
                 if not buf:
                     print(
                         "server: lost lost connection to %s" % (client_addr),

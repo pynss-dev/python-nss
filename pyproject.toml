@@ -12,6 +12,7 @@ line_length = 79
 
 [tool.black]
 include = '\.pyi?$'
+line-length = 79
 skip-string-normalization = true
 exclude = '''
 

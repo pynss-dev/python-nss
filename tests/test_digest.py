@@ -55,7 +55,9 @@ class TestDigest(unittest.TestCase):
 
         # Run the test with convenience digest function
         # (e.g. nss.sha256_digest, etc.).
-        test_digest = nss.data_to_hex(nss_digest_func(ref_data), separator=None)
+        test_digest = nss.data_to_hex(
+            nss_digest_func(ref_data), separator=None
+        )
         if verbose:
             print('nss %s\n%s' % (nss_digest_func.__name__, test_digest))
 
@@ -68,7 +70,9 @@ class TestDigest(unittest.TestCase):
 
         # Run the test using the generic hash_buf function specifying the hash
         # algorithm.
-        test_digest = nss.data_to_hex(nss.hash_buf(hash_oid, ref_data), separator=None)
+        test_digest = nss.data_to_hex(
+            nss.hash_buf(hash_oid, ref_data), separator=None
+        )
         if verbose:
             print('nss.hash_buf %s\n%s' % (hash_oid_name, test_digest))
 
@@ -110,7 +114,10 @@ class TestDigest(unittest.TestCase):
 
         test_digest = nss.data_to_hex(context.digest_final(), separator=None)
         if verbose:
-            print('chunked nss.digest_context %s\n%s' % (hash_oid_name, test_digest))
+            print(
+                'chunked nss.digest_context %s\n%s'
+                % (hash_oid_name, test_digest)
+            )
 
         self.assertEqual(
             test_digest,
@@ -126,10 +133,14 @@ class TestDigest(unittest.TestCase):
         self.do_test('sha1', 'sha1sum', nss.sha1_digest, nss.SEC_OID_SHA1)
 
     def test_sha256(self):
-        self.do_test('sha256', 'sha256sum', nss.sha256_digest, nss.SEC_OID_SHA256)
+        self.do_test(
+            'sha256', 'sha256sum', nss.sha256_digest, nss.SEC_OID_SHA256
+        )
 
     def test_sha512(self):
-        self.do_test('sha512', 'sha512sum', nss.sha512_digest, nss.SEC_OID_SHA512)
+        self.do_test(
+            'sha512', 'sha512sum', nss.sha512_digest, nss.SEC_OID_SHA512
+        )
 
 
 if __name__ == '__main__':

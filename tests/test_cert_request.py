@@ -123,7 +123,9 @@ class TestCertRequest(unittest.TestCase):
         pub_key = csr.subject_public_key_info
         pub_key_algorithm = pub_key.algorithm
 
-        self.assertEqual(pub_key_algorithm.id_tag, nss.SEC_OID_PKCS1_RSA_ENCRYPTION)
+        self.assertEqual(
+            pub_key_algorithm.id_tag, nss.SEC_OID_PKCS1_RSA_ENCRYPTION
+        )
         self.assertEqual(pub_key.public_key.rsa.exponent.get_integer(), 65537)
 
         # Validate the extensions, the number of extensions should
@@ -182,18 +184,24 @@ class TestCertRequest(unittest.TestCase):
 
         attribute = attributes[1]
         self.assertIsInstance(attribute, nss.CertAttribute)
-        self.assertEqual(attribute.type_tag, nss.SEC_OID_PKCS9_EXTENSION_REQUEST)
+        self.assertEqual(
+            attribute.type_tag, nss.SEC_OID_PKCS9_EXTENSION_REQUEST
+        )
 
         attribute_values = attribute.values
         self.assertEqual(len(attribute_values), 2)
 
         attribute_value = attribute.values[0]
         self.assertIsInstance(attribute_value, nss.CertificateExtension)
-        self.assertEqual(attribute_value.oid_tag, nss.SEC_OID_X509_BASIC_CONSTRAINTS)
+        self.assertEqual(
+            attribute_value.oid_tag, nss.SEC_OID_X509_BASIC_CONSTRAINTS
+        )
 
         attribute_value = attribute.values[1]
         self.assertIsInstance(attribute_value, nss.CertificateExtension)
-        self.assertEqual(attribute_value.oid_tag, nss.SEC_OID_X509_SUBJECT_KEY_ID)
+        self.assertEqual(
+            attribute_value.oid_tag, nss.SEC_OID_X509_SUBJECT_KEY_ID
+        )
 
 
 if __name__ == '__main__':

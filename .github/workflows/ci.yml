@@ -28,10 +28,11 @@ jobs:
     needs: [sca]
     strategy:
       matrix:
-        - {os: ubuntu-latest, version: '3.6', pyver: cp36}
-        - {os: ubuntu-latest, version: '3.7', pyver: cp37}
-        - {os: ubuntu-latest, version: '3.8', pyver: cp38}
-        - {os: ubuntu-latest, version: '3.9', pyver: cp39}
+        python:
+          - {os: ubuntu-latest, version: '3.6', pyver: cp36}
+          - {os: ubuntu-latest, version: '3.7', pyver: cp37}
+          - {os: ubuntu-latest, version: '3.8', pyver: cp38}
+          - {os: ubuntu-latest, version: '3.9', pyver: cp39}
     env:
       python: python${{ matrix.version }}
     steps:

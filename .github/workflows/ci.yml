@@ -56,9 +56,11 @@ jobs:
                 nspr-devel \
               && ${{ env.python }} -m venv .env \
               && source .env/bin/activate \
-              && pip install -U pip wheel sphinx setuptools \
+              && pip install -U auditwheel pip sphinx setuptools wheel \
               && pip install -r requirements.txt \
               && python setup.py bdist_wheel \
+              && auditwheel repair \
+                dist/python_nss-*${{ matrix.python.pyver }}*-linux_*.whl \
               && deactivate"
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3

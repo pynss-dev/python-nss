@@ -96,7 +96,6 @@ jobs:
           name: linux-wheel
       - name: Install dependencies
         run: |
-          ls -al
           PACKAGE=$(basename python_nss-*${{ matrix.python.pyver }}*manylinux*.whl)
           ${{ env.python }} -m pip install --upgrade pip setuptools
           ${{ env.python }} -m pip install -r requirements.txt

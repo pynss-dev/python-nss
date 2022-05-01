@@ -83,7 +83,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Install base dependencies
-        run: sudo apt-get install -y libnss3 libnss3-tools
+        run: sudo apt-get install -y libnss3-dev libnss3-tools libnspr4-dev
       - name: Set up Python ${{ matrix.python.version }}
         uses: actions/setup-python@v2
         with:
@@ -95,7 +95,7 @@ jobs:
       - name: Install dependencies
         run: |
           ls -al
-          PACKAGE=$(basename python_nss-*${{ matrix.python.pyver }}*-linux_*.whl)
+          PACKAGE=$(basename python_nss-*${{ matrix.python.pyver }}*manylinux*.whl)
           ${{ env.python }} -m pip install --upgrade pip setuptools
           ${{ env.python }} -m pip install -r requirements.txt
           ${{ env.python }} -m pip install "${PACKAGE}"

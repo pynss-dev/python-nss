@@ -11,6 +11,7 @@
 -i https://pypi.org/simple
 -r requirements.txt
 alabaster==0.7.12
+auditwheel==5.1.2
 babel==2.10.1; python_version >= '3.6'
 bindep==2.11.0
 black==22.3.0

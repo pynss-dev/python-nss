@@ -111,9 +111,7 @@ class TestCipher(unittest.TestCase):
         encrypted_file = open(encrypted_filename, 'wb')
 
         if verbose:
-            print(
-                "Encrypting file '%s' to '%s'" % (in_filename, encrypted_filename)
-            )
+            print("Encrypting file '%s' to '%s'" % (in_filename, encrypted_filename))
 
         # Encode the data read from a file in chunks
         while True:

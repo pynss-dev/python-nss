@@ -15,7 +15,7 @@ from setuptools._distutils.util import change_root, subst_vars
 from sphinx.setup_command import BuildDoc as SphinxBuildDoc
 
 name = 'python-nss'
-version = '2.0.0.dev0'
+version = '2.0.0.dev1'
 release = version
 
 doc_manifest = [
@@ -452,9 +452,9 @@ def main(argv):
             'Environment :: Console',
             'Intended Audience :: Developers',
             'Intended Audience :: System Administrators',
-            'License :: OSI Approved :: LGPL License',
-            'License :: OSI Approved :: GPL License',
-            'License :: OSI Approved :: MPL License',
+            'License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)',
+            'License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)',
+            'License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)',
             # 'Operating System :: MacOS :: MacOS X',
             # 'Operating System :: Microsoft :: Windows',
             'Operating System :: POSIX',

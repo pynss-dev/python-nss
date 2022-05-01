@@ -3,7 +3,6 @@ from __future__ import absolute_import, print_function
 import unittest
 
 from nss import nss
-from nss.error import NSPRError
 
 
 class ExceptionNotRaised(Exception):
@@ -23,7 +22,8 @@ class ExceptionNotRaised(Exception):
 
 class ExceptionWrongErrno(Exception):
     """
-    Exception raised when an *expected* exception is raised with the wrong errno.
+    Exception raised when an *expected* exception is raised with the wrong
+    errno.
     """
 
     msg = 'expected %s with errno = %s but got errno = %s'
@@ -55,13 +55,20 @@ def assertRaisesErrno(exception, errno, callback, *args, **kw):
 
 
 class TestCertName(unittest.TestCase):
-    subject_name = 'CN=www.redhat.com,OU=Web Operations,O=Red Hat Inc,L=Raleigh,ST=North Carolina,C=US'
     cn_name = 'www.redhat.com'
     ou_name = 'Web Operations'
     o_name = 'Red Hat Inc'
     l_name = 'Raleigh'
     st_name = 'North Carolina'
     c_name = 'US'
+    subject_name = "CN={cn},OU={ou},O={o},L={lo},ST={st},C={c}".format(
+        cn=cn_name,
+        ou=ou_name,
+        o=o_name,
+        lo=l_name,
+        st=st_name,
+        c=c_name,
+    )
 
     def setUp(self):
         nss.nss_init_nodb()

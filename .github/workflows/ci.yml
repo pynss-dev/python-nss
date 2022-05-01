@@ -24,13 +24,16 @@ jobs:
           python -m isort --check **/*.py
           python -m black --check **/*.py
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.python.os }}
     needs: [sca]
     strategy:
       matrix:
-        python-version: ['3.6', '3.7', '3.8', '3.9']
+        - {os: ubuntu-latest, version: '3.6', pyver: cp36}
+        - {os: ubuntu-latest, version: '3.7', pyver: cp37}
+        - {os: ubuntu-latest, version: '3.8', pyver: cp38}
+        - {os: ubuntu-latest, version: '3.9', pyver: cp39}
     env:
-      python: python${{ matrix.python-version }}
+      python: python${{ matrix.version }}
     steps:
       - uses: actions/checkout@v3
       - name: Set up QEMU
@@ -40,9 +43,9 @@ jobs:
         run: |
           docker run \
           --rm \
-          --volume ${{ github.workspace }}:/usr/local/src/build:rw \
-          --workdir /usr/local/src/build \
-          quay.io/pypa/manylinux2014_x86_64 \
+          --volume ${{ github.workspace }}:/io:rw \
+          --workdir /io \
+          quay.io/pypa/manylinux2014_x86_64:latest \
           bash -exc "yum update-minimal --security -y \
             && yum install -y \
               gcc \

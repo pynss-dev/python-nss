@@ -1,16 +1,12 @@
 from __future__ import absolute_import, print_function
 
-import os
 import re
-import shlex
 import shutil
 import subprocess
-import sys
 import unittest
 from io import BytesIO
 
 from nss import nss
-from nss.error import NSPRError
 
 CERTUTIL = shutil.which('certutil')
 MODUTIL = shutil.which('modutil')
@@ -26,7 +22,9 @@ exported_pk12_filename = "exported_%s" % pk12_filename
 
 
 class CmdError(Exception):
-    def __init__(self, cmd_args, returncode, message=None, stdout=None, stderr=None):
+    def __init__(
+        self, cmd_args, returncode, message=None, stdout=None, stderr=None
+    ):
         self.cmd_args = cmd_args
         self.returncode = returncode
         if message is None:
@@ -287,11 +285,15 @@ class TestPKCS12Export(unittest.TestCase):
         pk12_listing = strip_salt_from_pk12_listing(pk12_listing)
 
         exported_pk12_listing = list_pk12(exported_pk12_filename)
-        exported_pk12_listing = strip_key_from_pk12_listing(exported_pk12_listing)
-        exported_pk12_listing = strip_salt_from_pk12_listing(exported_pk12_listing)
+        exported_pk12_listing = strip_key_from_pk12_listing(
+            exported_pk12_listing
+        )
+        exported_pk12_listing = strip_salt_from_pk12_listing(
+            exported_pk12_listing
+        )
 
         self.assertEqual(pk12_listing, exported_pk12_listing)
 
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(failfast=True)

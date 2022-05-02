@@ -385,7 +385,7 @@ def create_client_cert(options):
 def add_trusted_certs(options):
     name = 'ca_certs'
     x86_64_multiarch_dir = os.path.join(
-        os.sep, 'usr', 'lib', 'x86_64-linux-gnu'
+        os.sep, 'usr', 'lib', 'x86_64-linux-gnu', 'nss'
     )
     if os.path.isdir(x86_64_multiarch_dir):
         basedir = x86_64_multiarch_dir
@@ -663,7 +663,7 @@ def setup_certs(args):
     if options.db_type == '':
         options.db_name = options.db_dir
     else:
-        options.db_name = '%s:%s' % (options.db_type, options.db_dir)
+        options.db_name = "%s:%s" % (options.db_type, options.db_dir)
     options.passwd_filename = None
     options.noise_filename = None
 

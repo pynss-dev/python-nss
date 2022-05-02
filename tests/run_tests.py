@@ -37,8 +37,8 @@ def run_tests():
     suite.addTests(loader.loadTestsFromModule(test_cert_request))
     suite.addTests(loader.loadTestsFromModule(test_client_server))
 
-    result = runner.run(suite)
-    return len(result.failures)
+    result = runner.run(suite).wasSuccessful()
+    return result
 
 
 def main():
@@ -85,13 +85,8 @@ def main():
     else:
         print('Using installed libraries')
 
-    num_failures = run_tests()
-
-    if num_failures == 0:
-        return 0
-    else:
-        return 1
+    return run_tests()
 
 
 if __name__ == '__main__':
-    exit(main())
+    sys.exit(main())

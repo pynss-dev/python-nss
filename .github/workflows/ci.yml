@@ -99,9 +99,9 @@ jobs:
         run: |
           docker run \
             --rm \
-            --volume ${{ github.workspace }}:/io:rw \
-            --workdir /io \
-            quay.io/pypa/manylinux2014_x86_64:latest \
+            --volume ${{ github.workspace }}:/test:rw \
+            --workdir /test \
+            quay.io/centos/centos:stream8 \
             bash -exc "yum update-minimal --security -y \
               && yum install -y nspr nss nss-tools \
               && ${{ env.python }} -m venv .env \

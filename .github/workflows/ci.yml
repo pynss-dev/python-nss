@@ -104,7 +104,7 @@ jobs:
               && source .env/bin/activate \
               && ${{ env.python }} -m pip install -r dev-requirements.txt \
               && ${{ env.python }} -m pip install \
-                $(basename python_nss-*${{ matrix.python.pyver }}*.whl) \
+                $(basename python_nss*${{ matrix.python.pyver }}*.whl) \
               && tests/run_tests.py \
               && deactivate"
   publish:

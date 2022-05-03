@@ -296,4 +296,4 @@ class TestPKCS12Export(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main(failfast=True)
+    unittest.main()

@@ -103,7 +103,7 @@ jobs:
       # - name: Validate test environment
       #   run: ${{ env.python }} -m bindep --file bindep.txt runtime
       - name: Run test suite
-        run: ${{ env.python }} tests/run_tests.py
+        run: tests/run_tests.py
   publish:
     runs-on: ubuntu-latest
     needs: [build, test]

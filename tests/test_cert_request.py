@@ -1,9 +1,3 @@
-from __future__ import absolute_import, print_function
-
-import unittest
-
-from nss import nss
-
 """
 This test assures we can load a CSR (Certificate Signing Request) and
 properly extract it's contents. A test CSR was generated and below is
@@ -80,6 +74,12 @@ k1F95xMe20g7OtKWPVD0hCGRdlZyxSKslldC3M28pbQNXJXYoqVJb64QqPWwrTC2
 A14UcVC+HGFtPly+faSutL65PQ==
 -----END CERTIFICATE REQUEST-----
 """
+
+from __future__ import absolute_import, print_function
+
+import unittest
+
+from nss import nss
 
 # The exact same PEM data from above
 pem = """
@@ -205,4 +205,4 @@ class TestCertRequest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main(failfast=True)
+    unittest.main()

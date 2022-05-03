@@ -11,7 +11,7 @@ class ExceptionNotRaised(Exception):
     unit test.
     """
 
-    msg = 'expected %s'
+    msg = "expected %s"
 
     def __init__(self, expected):
         self.expected = expected
@@ -26,7 +26,7 @@ class ExceptionWrongErrno(Exception):
     errno.
     """
 
-    msg = 'expected %s with errno = %s but got errno = %s'
+    msg = "expected %s with errno = %s but got errno = %s"
 
     def __init__(self, expected, expected_errno, actual_errno):
         self.expected = expected
@@ -136,14 +136,14 @@ class TestCertName(unittest.TestCase):
 
         rdn = nss.RDN(cn_ava)
         self.assertEqual(len(rdn), 1)
-        self.assertEqual(str(rdn), 'CN=%s' % (self.cn_name))
+        self.assertEqual(str(rdn), "CN=%s" % (self.cn_name))
         self.assertEqual(rdn[0], cn_ava)
         self.assertEqual(rdn['cn'], [cn_ava])
 
         rdn = nss.RDN(cn_ava, ou_ava)
         self.assertEqual(len(rdn), 2)
         self.assertEqual(
-            str(rdn), 'CN=%s+OU=%s' % (self.cn_name, self.ou_name)
+            str(rdn), "CN=%s+OU=%s" % (self.cn_name, self.ou_name)
         )
 
         self.assertEqual(rdn[0], cn_ava)
@@ -156,7 +156,7 @@ class TestCertName(unittest.TestCase):
             elif i == 1:
                 self.assertEqual(ava, ou_ava)
             else:
-                self.fail("excess ava's")
+                self.fail('excess ava\'s')
             i += 1
 
         self.assertEqual(list(rdn), [cn_ava, ou_ava])
@@ -186,13 +186,13 @@ class TestCertName(unittest.TestCase):
 
         try:
             rdn['st']
-            self.fail("expected KeyError for 'st'")
+            self.fail('expected KeyError for "st"')
         except KeyError:
             pass
 
         try:
             rdn['junk']
-            self.fail("expected KeyError for 'junk'")
+            self.fail('expected KeyError for "junk"')
         except KeyError:
             pass
 
@@ -231,7 +231,7 @@ class TestCertName(unittest.TestCase):
             elif i == 5:
                 self.assertEqual(rdn, cn_rdn)
             else:
-                self.fail("excess rdn's")
+                self.fail('excess rdn\'s')
             i += 1
 
         self.assertEqual(
@@ -382,4 +382,4 @@ class TestCertName(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main(failfast=True)
+    unittest.main()

@@ -26,7 +26,8 @@ def run_tests():
     setup_certs.setup_certs([])
 
     loader = unittest.TestLoader()
-    runner = unittest.TextTestRunner()
+    # test_suite = unittest.defaultTestLoader.discover('.', '*_test.py')
+    runner = unittest.TextTestRunner(resultclass=unittest.TextTestResult)
 
     suite = loader.loadTestsFromModule(test_cert_components)
     suite.addTests(loader.loadTestsFromModule(test_cipher))
@@ -37,8 +38,8 @@ def run_tests():
     suite.addTests(loader.loadTestsFromModule(test_cert_request))
     suite.addTests(loader.loadTestsFromModule(test_client_server))
 
-    result = runner.run(suite).wasSuccessful()
-    return result
+    result = runner.run(suite)
+    return not result.wasSuccessful()
 
 
 def main():

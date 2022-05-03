@@ -95,7 +95,7 @@ def read_serial(options):
 
 
 def init_noise_file(options):
-    """Generate a noise file to be used when creating a key
+    """Generate a noise file to be used when creating a key.
 
     We create a temporary file on first use and continue to use
     the same temporary file for the duration of this process.
@@ -723,14 +723,3 @@ def setup_certs(args):
     )
 
     return 0
-
-
-# -------------------------------------------------------------------------------
-
-
-def main():
-    return setup_certs(None)
-
-
-if __name__ == '__main__':
-    sys.exit(main())

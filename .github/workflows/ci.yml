@@ -29,10 +29,10 @@ jobs:
     strategy:
       matrix:
         python:
-          - {os: ubuntu-latest, version: '3.6', pyver: cp36}
+          # - {os: ubuntu-latest, version: '3.6', pyver: cp36}
           - {os: ubuntu-latest, version: '3.7', pyver: cp37}
-          - {os: ubuntu-latest, version: '3.8', pyver: cp38}
-          - {os: ubuntu-latest, version: '3.9', pyver: cp39}
+          # - {os: ubuntu-latest, version: '3.8', pyver: cp38}
+          # - {os: ubuntu-latest, version: '3.9', pyver: cp39}
     env:
       python: python${{ matrix.python.version }}
     steps:
@@ -75,8 +75,8 @@ jobs:
         python:
           # - {os: ubuntu-latest, version: '3.6', pyver: cp36}
           - {os: ubuntu-latest, version: '3.7', pyver: cp37}
-          - {os: ubuntu-latest, version: '3.8', pyver: cp38}
-          - {os: ubuntu-latest, version: '3.9', pyver: cp39}
+          # - {os: ubuntu-latest, version: '3.8', pyver: cp38}
+          # - {os: ubuntu-latest, version: '3.9', pyver: cp39}
           # - {os: ubuntu-latest, version: '3.10', pyver: cp310}
     env:
       python: python${{ matrix.python.version }}
@@ -101,6 +101,7 @@ jobs:
             bash -exc "apt-get update \
               && apt install -y libnspr4 libnss3 libnss3-tools \
               && ldconfig -n /usr/lib/x86_64-linux-gnu/nss \
+              && ls /usr/lib/x86_64-linux-gnu/nss \
               && ${{ env.python }} -m venv .env \
               && source .env/bin/activate \
               && ${{ env.python }} -m pip install -r dev-requirements.txt \

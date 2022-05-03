@@ -97,7 +97,7 @@ jobs:
             --rm \
             --volume ${{ github.workspace }}:/io:rw \
             --workdir /io \
-            python:${{ version }}-buster \
+            python:${{ matrix.python.version }}-buster \
             bash -exc "yum update-minimal --security -y \
               && yum install -y libnspr4 libnss3 libnss3-tools \
               && ${{ env.python }} -m venv .env \

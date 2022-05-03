@@ -106,9 +106,8 @@ jobs:
               && yum install -y nspr nss nss-tools \
               && ${{ env.python }} -m venv .env \
               && source .env/bin/activate \
-              && ls \
-              && PACKAGE=$(basename python_nss-*${{ matrix.python.pyver }}*manylinux*.whl) \
-                ${{ env.python }} -m pip install \"${PACKAGE}\" \
+              && ${{ env.python }} -m pip install \
+                $(basename python_nss-*${{ matrix.python.pyver }}*.whl) \
               && tests/run_tests.py \
               && deactivate"
   publish:

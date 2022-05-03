@@ -103,11 +103,12 @@ jobs:
             --workdir /io \
             quay.io/pypa/manylinux2014_x86_64:latest \
             bash -exc "yum update-minimal --security -y \
-              && yum install -y nss nss-tools \
+              && yum install -y nspr nss nss-tools \
               && ${{ env.python }} -m venv .env \
               && source .env/bin/activate \
+              && ls \
               && PACKAGE=$(basename python_nss-*${{ matrix.python.pyver }}*manylinux*.whl) \
-              && ${{ env.python }} -m pip install ${PACKAGE} \
+              && ${{ env.python }} -m pip install \"${PACKAGE}\" \
               && tests/run_tests.py \
               && deactivate"
   publish:

@@ -18,9 +18,9 @@ def get_build_dir():
     If the build directory cannont be found in the tree None is returned.
     """
     cwd = os.getcwd()
-    path_components = cwd.split('/')
+    path_components = cwd.split(os.sep)
     while len(path_components):
-        path = os.path.join('/', *path_components)
+        path = os.path.join(os.sep, *path_components)
         setup_path = os.path.join(path, 'setup.py')
         build_path = os.path.join(path, 'build')
         # Does this directory contain the file 'setup.py' and the directory
@@ -43,7 +43,7 @@ def get_build_dir():
         path_components.pop()
 
     # Failed to find the build directory
-    return None
+    raise Exception('unable to create build directory')
 
 
 def insert_build_dir_into_path():

@@ -26,7 +26,6 @@ def run_tests():
     setup_certs.setup_certs([])
 
     loader = unittest.TestLoader()
-    # test_suite = unittest.defaultTestLoader.discover('.', '*_test.py')
     runner = unittest.TextTestRunner(resultclass=unittest.TextTestResult)
 
     suite = loader.loadTestsFromModule(test_cert_components)

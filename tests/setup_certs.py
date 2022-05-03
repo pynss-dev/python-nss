@@ -7,7 +7,6 @@ import os
 import re
 import shutil
 import subprocess
-import sys
 import tempfile
 from string import Template
 
@@ -21,6 +20,7 @@ FIPS_ALREADY_OFF_ERR = 13
 
 CERTUTIL = shutil.which('certutil')
 MODUTIL = shutil.which('modutil')
+BASEDIR = os.getcwd()
 
 
 class CmdError(Exception):

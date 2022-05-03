@@ -6,8 +6,8 @@ from distutils.util import get_platform
 def get_build_dir():
     """
     Walk from the current directory up until a directory is found
-    which contains a regular file called "setup.py" and a directory
-    called "build". If found return the fully qualified path to
+    which contains a regular file called 'setup.py' and a directory
+    called 'build'. If found return the fully qualified path to
     the build directory's platform specific directory, this is where
     the architecture specific build produced by setup.py is located.
 
@@ -18,12 +18,13 @@ def get_build_dir():
     If the build directory cannont be found in the tree None is returned.
     """
     cwd = os.getcwd()
-    path_components = cwd.split('/')
+    path_components = cwd.split(os.sep)
     while len(path_components):
-        path = os.path.join('/', *path_components)
+        path = os.path.join(os.sep, *path_components)
         setup_path = os.path.join(path, 'setup.py')
         build_path = os.path.join(path, 'build')
-        # Does this directory contain the file "setup.py" and the directory "build"?
+        # Does this directory contain the file 'setup.py' and the directory
+        # 'build'?
         if (
             os.path.exists(setup_path)
             and os.path.exists(build_path)
@@ -32,14 +33,17 @@ def get_build_dir():
         ):
             # Found, return the path contentated with the architecture
             # specific build directory
-            platform_specifier = "lib.%s-%s" % (get_platform(), sys.version[0:3])
+            platform_specifier = "lib.%s-%s" % (
+                get_platform(),
+                sys.version[0:3],
+            )
             return os.path.join(build_path, platform_specifier)
 
         # Not found, ascend to parent directory and try again
         path_components.pop()
 
     # Failed to find the build directory
-    return None
+    raise Exception('unable to create build directory')
 
 
 def insert_build_dir_into_path():

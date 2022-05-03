@@ -7,7 +7,6 @@ import os
 import re
 import shutil
 import subprocess
-import sys
 import tempfile
 from string import Template
 
@@ -21,17 +20,20 @@ FIPS_ALREADY_OFF_ERR = 13
 
 CERTUTIL = shutil.which('certutil')
 MODUTIL = shutil.which('modutil')
+BASEDIR = os.getcwd()
 
 
 class CmdError(Exception):
-    def __init__(self, cmd_args, returncode, message=None, stdout=None, stderr=None):
+    def __init__(
+        self, cmd_args, returncode, message=None, stdout=None, stderr=None
+    ):
         self.cmd_args = cmd_args
         self.returncode = returncode
         if message is None:
-            self.message = 'Failed error=%s, ' % (returncode)
+            self.message = "Failed error=%s, " % (returncode)
             if stderr:
-                self.message += '"%s", ' % stderr
-            self.message += 'args=%s' % (cmd_args)
+                self.message += "'%s', " % stderr
+            self.message += "args=%s" % (cmd_args)
         else:
             self.message = message
         self.stdout = stdout
@@ -55,7 +57,11 @@ def run_cmd(cmd_args, input=None):
         returncode = p.returncode
         if returncode != 0:
             raise CmdError(
-                cmd_args, returncode, 'failed %s' % (' '.join(cmd_args)), stdout, stderr
+                cmd_args,
+                returncode,
+                "failed %s" % (' '.join(cmd_args)),
+                stdout,
+                stderr,
             )
         return stdout, stderr
     except OSError as e:
@@ -66,11 +72,11 @@ def exit_handler(options):
     logging.debug('in exit handler')
 
     if options.passwd_filename is not None:
-        logging.debug('removing passwd_filename=%s', options.passwd_filename)
+        logging.debug("removing passwd_filename=%s", options.passwd_filename)
         os.remove(options.passwd_filename)
 
     if options.noise_filename is not None:
-        logging.debug('removing noise_filename=%s', options.noise_filename)
+        logging.debug("removing noise_filename=%s", options.noise_filename)
         os.remove(options.noise_filename)
 
 
@@ -89,7 +95,7 @@ def read_serial(options):
 
 
 def init_noise_file(options):
-    """Generate a noise file to be used when creating a key
+    """Generate a noise file to be used when creating a key.
 
     We create a temporary file on first use and continue to use
     the same temporary file for the duration of this process.
@@ -148,13 +154,15 @@ def format_cert(options, nickname):
 
 def create_database(options):
     if os.path.exists(options.db_dir) and not os.path.isdir(options.db_dir):
-        raise ValueError('db_dir "%s" exists but is not a directory' % options.db_dir)
+        raise ValueError(
+            "db_dir '%s' exists but is not a directory" % options.db_dir
+        )
 
     # Create resources
     create_passwd_file(options)
 
     if options.clean:
-        logging.info('Creating clean database directory: "%s"', options.db_dir)
+        logging.info("Creating clean database directory: '%s'", options.db_dir)
 
         if os.path.exists(options.db_dir):
             shutil.rmtree(options.db_dir)
@@ -171,7 +179,7 @@ def create_database(options):
 
         stdout, stderr = run_cmd(cmd_args)
     else:
-        logging.info('Using existing database directory: "%s"', options.db_dir)
+        logging.info("Using existing database directory: '%s'", options.db_dir)
 
 
 def create_ca_cert(options):
@@ -179,7 +187,7 @@ def create_ca_cert(options):
     init_noise_file(options)
 
     logging.info(
-        'creating ca cert: subject="%s", nickname="%s"',
+        "creating ca cert: subject='%s', nickname='%s'",
         options.ca_subject,
         options.ca_nickname,
     )
@@ -230,7 +238,8 @@ def create_ca_cert(options):
     # >> Basic Constraints extension <<
     # Is this a CA certificate [y/N]?
     input += 'y\n'
-    # Enter the path length constraint, enter to skip [<0 for unlimited path]: > 2
+
+    # Enter path length constraint, enter to skip [<0 for unlimited path]: > 2
     input += '%d\n' % options.ca_path_len
     # Is this a critical extension [y/N]?
     input += 'y\n'
@@ -260,7 +269,7 @@ def create_server_cert(options):
     init_noise_file(options)
 
     logging.info(
-        'creating server cert: subject="%s", nickname="%s"',
+        "creating server cert: subject='%s', nickname='%s'",
         options.server_subject,
         options.server_nickname,
     )
@@ -319,7 +328,7 @@ def create_client_cert(options):
     init_noise_file(options)
 
     logging.info(
-        'creating client cert: subject="%s", nickname="%s"',
+        "creating client cert: subject='%s', nickname='%s'",
         options.client_subject,
         options.client_nickname,
     )
@@ -375,8 +384,17 @@ def create_client_cert(options):
 
 def add_trusted_certs(options):
     name = 'ca_certs'
-    module = os.path.join(os.sep, 'usr', 'lib64', 'libnssckbi.so')
-    logging.info('adding system trusted certs: name="%s" module="%s"', name, module)
+    x86_64_multiarch_dir = os.path.join(
+        os.sep, 'usr', 'lib', 'x86_64-linux-gnu', 'nss'
+    )
+    if os.path.isdir(x86_64_multiarch_dir):
+        basedir = x86_64_multiarch_dir
+    else:
+        basedir = os.path.join(os.sep, 'usr', 'lib64')
+    module = os.path.join(basedir, 'libnssckbi.so')
+    logging.info(
+        "adding system trusted certs: name='%s' module='%s'", name, module
+    )
 
     cmd_args = [
         MODUTIL,
@@ -397,7 +415,7 @@ def parse_fips_enabled(string):
         return False
     if re.search('FIPS mode enabled', string):
         return True
-    raise ValueError('unknown fips enabled string: "%s"' % string)
+    raise ValueError("unknown fips enabled string: '%s'" % string)
 
 
 def get_system_fips_enabled():
@@ -441,11 +459,11 @@ def set_fips_mode(options):
         state = 'true'
     else:
         if get_system_fips_enabled():
-            logger.warning("System FIPS enabled, cannot disable FIPS")
+            logger.warning('System FIPS enabled, cannot disable FIPS')
             return
         state = 'false'
 
-    logging.info('setting fips: %s', state)
+    logging.info("setting fips: %s", state)
 
     cmd_args = [
         MODUTIL,
@@ -492,7 +510,9 @@ def setup_certs(args):
     )
 
     parser.add_argument(
-        '--show-certs', action='store_true', help='show the certificate details'
+        '--show-certs',
+        action='store_true',
+        help='show the certificate details',
     )
 
     parser.add_argument(
@@ -511,7 +531,9 @@ def setup_certs(args):
 
     parser.add_argument('--hostname', help='hostname used in cert subjects')
 
-    parser.add_argument('--db-type', choices=['sql', ''], help='NSS database type')
+    parser.add_argument(
+        '--db-type', choices=['sql', ''], help='NSS database type'
+    )
 
     parser.add_argument('--db-dir', help='NSS database directory')
 
@@ -523,18 +545,25 @@ def setup_certs(args):
 
     parser.add_argument('--server-subject', help='server certificate subject')
 
-    parser.add_argument('--server-nickname', help='server certificate nickname')
+    parser.add_argument(
+        '--server-nickname', help='server certificate nickname'
+    )
 
     parser.add_argument(
-        '--client-username', help='client user name, used in client cert subject'
+        '--client-username',
+        help='client user name, used in client cert subject',
     )
 
     parser.add_argument('--client-subject', help='client certificate subject')
 
-    parser.add_argument('--client-nickname', help='client certificate nickname')
+    parser.add_argument(
+        '--client-nickname', help='client certificate nickname'
+    )
 
     parser.add_argument(
-        '--serial-number', type=int, help='starting serial number for certificates'
+        '--serial-number',
+        type=int,
+        help='starting serial number for certificates',
     )
 
     parser.add_argument(
@@ -544,7 +573,10 @@ def setup_certs(args):
         help='validity period in months',
     )
     parser.add_argument(
-        '--path-len', dest='ca_path_len', type=int, help='basic constraints path length'
+        '--path-len',
+        dest='ca_path_len',
+        type=int,
+        help='basic constraints path length',
     )
     parser.add_argument(
         '--key-type', dest='key_type', help='key type, either rsa or dsa'
@@ -561,7 +593,9 @@ def setup_certs(args):
     )
 
     parser.add_argument(
-        '--db-fips', action='store_true', help='enable FIPS mode on NSS Database'
+        '--db-fips',
+        action='store_true',
+        help='enable FIPS mode on NSS Database',
     )
 
     parser.set_defaults(
@@ -594,8 +628,9 @@ def setup_certs(args):
     options = parser.parse_args(args)
 
     # Do substitutions on option values.
-    # This is ugly because argparse does not expose an API which permits iterating over
-    # the contents of options nor a way to get the options as a dict, ugh :-(
+    # This is ugly because argparse does not expose an API which permits
+    # iterating over the contents of options nor a way to get the options as a
+    # dict, ugh :-(
     # So we access options.__dict__ directly.
     for key in list(options.__dict__.keys()):
         # Assume options never begin with underscore
@@ -605,7 +640,8 @@ def setup_certs(args):
         # Can't substitue on non-string values
         if not isinstance(value, six.string_types):
             continue
-        # Don't bother trying to substitute if $ substitution character isn't present
+        # Do not bother trying to substitute if $ substitution character is not
+        # present
         if '$' not in value:
             continue
         setattr(options, key, Template(value).substitute(options.__dict__))
@@ -627,7 +663,7 @@ def setup_certs(args):
     if options.db_type == '':
         options.db_name = options.db_dir
     else:
-        options.db_name = '%s:%s' % (options.db_type, options.db_dir)
+        options.db_name = "%s:%s" % (options.db_type, options.db_dir)
     options.passwd_filename = None
     options.noise_filename = None
 
@@ -657,40 +693,33 @@ def setup_certs(args):
             logger.setLevel(logging.INFO)
         for nickname in cert_nicknames:
             logging.info(
-                'Certificate nickname "%s"\n%s',
+                "Certificate nickname '%s'\n%s",
                 nickname,
                 format_cert(options, nickname),
             )
 
     logging.info('---------- Summary ----------')
     logging.info(
-        'NSS database name="%s", password="%s"', options.db_name, options.db_passwd
+        "NSS database name='%s', password='%s'",
+        options.db_name,
+        options.db_passwd,
     )
-    logging.info('system FIPS mode=%s', get_system_fips_enabled())
-    logging.info('DB FIPS mode=%s', get_db_fips_enabled(options.db_name))
+    logging.info("system FIPS mode=%s", get_system_fips_enabled())
+    logging.info("DB FIPS mode=%s", get_db_fips_enabled(options.db_name))
     logging.info(
-        'CA nickname="%s", CA subject="%s"', options.ca_nickname, options.ca_subject
+        "CA nickname='%s', CA subject='%s'",
+        options.ca_nickname,
+        options.ca_subject,
     )
     logging.info(
-        'server nickname="%s", server subject="%s"',
+        "server nickname='%s', server subject='%s'",
         options.server_nickname,
         options.server_subject,
     )
     logging.info(
-        'client nickname="%s", client subject="%s"',
+        "client nickname='%s', client subject='%s'",
         options.client_nickname,
         options.client_subject,
     )
 
     return 0
-
-
-# -------------------------------------------------------------------------------
-
-
-def main():
-    return setup_certs(None)
-
-
-if __name__ == '__main__':
-    sys.exit(main())

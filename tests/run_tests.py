@@ -26,7 +26,7 @@ def run_tests():
     setup_certs.setup_certs([])
 
     loader = unittest.TestLoader()
-    runner = unittest.TextTestRunner()
+    runner = unittest.TextTestRunner(resultclass=unittest.TextTestResult)
 
     suite = loader.loadTestsFromModule(test_cert_components)
     suite.addTests(loader.loadTestsFromModule(test_cipher))
@@ -38,12 +38,14 @@ def run_tests():
     suite.addTests(loader.loadTestsFromModule(test_client_server))
 
     result = runner.run(suite)
-    return len(result.failures)
+    return not result.wasSuccessful()
 
 
 def main():
     """Provide main entrypoint for test execution."""
-    parser = argparse.ArgumentParser(description='run the units (installed or in tree)')
+    parser = argparse.ArgumentParser(
+        description='run the units (installed or in tree)'
+    )
     parser.add_argument(
         '-i',
         '--installed',
@@ -72,7 +74,10 @@ def main():
 
         build_dir = get_build_dir()
         if build_dir and os.path.exists(build_dir):
-            print("Using local libraries from tree, located here:\n%s\n" % build_dir)
+            print(
+                "Using local libraries from tree, located here:\n%s\n"
+                % build_dir
+            )
             sys.path.insert(0, build_dir)
         else:
             print('ERROR: Unable to locate in tree libraries', file=sys.stderr)
@@ -80,12 +85,7 @@ def main():
     else:
         print('Using installed libraries')
 
-    num_failures = run_tests()
-
-    if num_failures == 0:
-        return 0
-    else:
-        return 1
+    return run_tests()
 
 
 if __name__ == '__main__':

@@ -31,7 +31,9 @@ def setup_contexts(mechanism, key, iv):
     else:
         if verbose:
             print('generating key data')
-        sym_key = slot.key_gen(mechanism, None, slot.get_best_key_length(mechanism))
+        sym_key = slot.key_gen(
+            mechanism, None, slot.get_best_key_length(mechanism)
+        )
 
     # If initialization vector was supplied use it, otherwise set it to None
     if iv:
@@ -70,7 +72,9 @@ def setup_contexts(mechanism, key, iv):
 class TestCipher(unittest.TestCase):
     def setUp(self):
         nss.nss_init_nodb()
-        self.encoding_ctx, self.decoding_ctx = setup_contexts(mechanism, key, iv)
+        self.encoding_ctx, self.decoding_ctx = setup_contexts(
+            mechanism, key, iv
+        )
 
     def tearDown(self):
         del self.encoding_ctx
@@ -81,15 +85,20 @@ class TestCipher(unittest.TestCase):
         if verbose:
             print("Plain Text:\n%s" % (plain_text))
 
-        # Encode the plain text by feeding it to cipher_op getting cipher text back.
+        # Encode the plain text by feeding it to cipher_op getting cipher text
+        # back.
         # Append the final bit of cipher text by calling digest_final
         cipher_text = self.encoding_ctx.cipher_op(plain_text)
         cipher_text += self.encoding_ctx.digest_final()
 
         if verbose:
-            print("Cipher Text:\n%s" % (nss.data_to_hex(cipher_text, separator=':')))
+            print(
+                "Cipher Text:\n%s"
+                % (nss.data_to_hex(cipher_text, separator=':'))
+            )
 
-        # Decode the cipher text by feeding it to cipher_op getting plain text back.
+        # Decode the cipher text by feeding it to cipher_op getting plain text
+        # back.
         # Append the final bit of plain text by calling digest_final
         decoded_text = self.decoding_ctx.cipher_op(cipher_text)
         decoded_text += self.decoding_ctx.digest_final()
@@ -111,17 +120,22 @@ class TestCipher(unittest.TestCase):
         encrypted_file = open(encrypted_filename, 'wb')
 
         if verbose:
-            print("Encrypting file '%s' to '%s'" % (in_filename, encrypted_filename))
+            print(
+                "Encrypting file '%s' to '%s'"
+                % (in_filename, encrypted_filename)
+            )
 
         # Encode the data read from a file in chunks
         while True:
-            # Read a chunk of data until EOF, encrypt it and write the encrypted data
+            # Read a chunk of data until EOF, encrypt it and write the
+            # encrypted data
             in_data = in_file.read(chunk_size)
             if len(in_data) == 0:  # EOF
                 break
             encrypted_data = self.encoding_ctx.cipher_op(in_data)
             encrypted_file.write(encrypted_data)
-        # Done encoding the input, get the final encoded data, write it, close files
+        # Done encoding the input, get the final encoded data, write it, close
+        # files
         encrypted_data = self.encoding_ctx.digest_final()
         encrypted_file.write(encrypted_data)
         in_file.close()
@@ -137,13 +151,15 @@ class TestCipher(unittest.TestCase):
         encrypted_file = open(encrypted_filename, 'rb')
         decrypted_file = open(decrypted_filename, 'wb')
         while True:
-            # Read a chunk of data until EOF, encrypt it and write the encrypted data
+            # Read a chunk of data until EOF, encrypt it and write the
+            # encrypted data
             in_data = encrypted_file.read(chunk_size)
             if len(in_data) == 0:  # EOF
                 break
             decrypted_data = self.decoding_ctx.cipher_op(in_data)
             decrypted_file.write(decrypted_data)
-        # Done encoding the input, get the final encoded data, write it, close files
+        # Done encoding the input, get the final encoded data, write it, close
+        # files
         decrypted_data = self.decoding_ctx.digest_final()
         decrypted_file.write(decrypted_data)
         encrypted_file.close()
@@ -159,11 +175,11 @@ class TestCipher(unittest.TestCase):
             decrypted_data = f.read()
 
         if decrypted_data != in_data:
-            result = 1
+            # result = 1
             print('FAILED! decrypted_data != in_data')
 
         if encrypted_data == in_data:
-            result = 1
+            # result = 1
             print('FAILED! encrypted_data == in_data')
 
         # clean up

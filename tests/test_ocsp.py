@@ -1,7 +1,5 @@
 from __future__ import absolute_import, print_function
 
-import os
-import sys
 import unittest
 
 from nss import nss
@@ -31,7 +29,9 @@ class TestAPI(unittest.TestCase):
 
     def test_ocsp_failure_mode(self):
         nss.set_ocsp_failure_mode(nss.ocspMode_FailureIsVerificationFailure)
-        nss.set_ocsp_failure_mode(nss.ocspMode_FailureIsNotAVerificationFailure)
+        nss.set_ocsp_failure_mode(
+            nss.ocspMode_FailureIsNotAVerificationFailure
+        )
         with self.assertRaises(NSPRError):
             nss.set_ocsp_failure_mode(-1)
 
@@ -39,9 +39,11 @@ class TestAPI(unittest.TestCase):
         # should raise error if cert is not known
         with self.assertRaises(NSPRError):
             nss.set_ocsp_default_responder(
-                self.certdb, "http://foo.com:80/ocsp", 'invalid'
+                self.certdb, 'http://foo.com:80/ocsp', 'invalid'
             )
-        nss.set_ocsp_default_responder(self.certdb, "http://foo.com:80/ocsp", 'test_ca')
+        nss.set_ocsp_default_responder(
+            self.certdb, 'http://foo.com:80/ocsp', 'test_ca'
+        )
         nss.enable_ocsp_default_responder()
         nss.disable_ocsp_default_responder()
         nss.enable_ocsp_default_responder(self.certdb)

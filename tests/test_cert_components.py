@@ -3,7 +3,6 @@ from __future__ import absolute_import, print_function
 import unittest
 
 from nss import nss
-from nss.error import NSPRError
 
 
 class ExceptionNotRaised(Exception):
@@ -12,7 +11,7 @@ class ExceptionNotRaised(Exception):
     unit test.
     """
 
-    msg = 'expected %s'
+    msg = "expected %s"
 
     def __init__(self, expected):
         self.expected = expected
@@ -23,10 +22,11 @@ class ExceptionNotRaised(Exception):
 
 class ExceptionWrongErrno(Exception):
     """
-    Exception raised when an *expected* exception is raised with the wrong errno.
+    Exception raised when an *expected* exception is raised with the wrong
+    errno.
     """
 
-    msg = 'expected %s with errno = %s but got errno = %s'
+    msg = "expected %s with errno = %s but got errno = %s"
 
     def __init__(self, expected, expected_errno, actual_errno):
         self.expected = expected
@@ -55,13 +55,20 @@ def assertRaisesErrno(exception, errno, callback, *args, **kw):
 
 
 class TestCertName(unittest.TestCase):
-    subject_name = 'CN=www.redhat.com,OU=Web Operations,O=Red Hat Inc,L=Raleigh,ST=North Carolina,C=US'
     cn_name = 'www.redhat.com'
     ou_name = 'Web Operations'
     o_name = 'Red Hat Inc'
     l_name = 'Raleigh'
     st_name = 'North Carolina'
     c_name = 'US'
+    subject_name = "CN={cn},OU={ou},O={o},L={lo},ST={st},C={c}".format(
+        cn=cn_name,
+        ou=ou_name,
+        o=o_name,
+        lo=l_name,
+        st=st_name,
+        c=c_name,
+    )
 
     def setUp(self):
         nss.nss_init_nodb()
@@ -76,7 +83,9 @@ class TestCertName(unittest.TestCase):
     def test_ava_from_oid_tag(self):
         ava = nss.AVA(nss.SEC_OID_AVA_COMMON_NAME, self.cn_name)
         self.assertEqual(str(ava), "CN=%s" % self.cn_name)
-        self.assertRaises(ValueError, nss.AVA, nss.SEC_OID_UNKNOWN, self.cn_name)
+        self.assertRaises(
+            ValueError, nss.AVA, nss.SEC_OID_UNKNOWN, self.cn_name
+        )
 
     def test_ava_from_oid_string(self):
         ava = nss.AVA('2.5.4.3', self.cn_name)
@@ -88,7 +97,9 @@ class TestCertName(unittest.TestCase):
         self.assertEqual(
             nss.oid_dotted_decimal(nss.SEC_OID_AVA_COMMON_NAME), 'OID.2.5.4.3'
         )
-        self.assertEqual(nss.oid_tag('OID.2.5.4.3'), nss.SEC_OID_AVA_COMMON_NAME)
+        self.assertEqual(
+            nss.oid_tag('OID.2.5.4.3'), nss.SEC_OID_AVA_COMMON_NAME
+        )
         self.assertEqual(nss.oid_tag('2.5.4.3'), nss.SEC_OID_AVA_COMMON_NAME)
         self.assertRaises(ValueError, nss.oid_tag, 'OID.99.99.99.99')
 
@@ -125,13 +136,15 @@ class TestCertName(unittest.TestCase):
 
         rdn = nss.RDN(cn_ava)
         self.assertEqual(len(rdn), 1)
-        self.assertEqual(str(rdn), 'CN=%s' % (self.cn_name))
+        self.assertEqual(str(rdn), "CN=%s" % (self.cn_name))
         self.assertEqual(rdn[0], cn_ava)
         self.assertEqual(rdn['cn'], [cn_ava])
 
         rdn = nss.RDN(cn_ava, ou_ava)
         self.assertEqual(len(rdn), 2)
-        self.assertEqual(str(rdn), 'CN=%s+OU=%s' % (self.cn_name, self.ou_name))
+        self.assertEqual(
+            str(rdn), "CN=%s+OU=%s" % (self.cn_name, self.ou_name)
+        )
 
         self.assertEqual(rdn[0], cn_ava)
         self.assertEqual(rdn[1], ou_ava)
@@ -143,7 +156,7 @@ class TestCertName(unittest.TestCase):
             elif i == 1:
                 self.assertEqual(ava, ou_ava)
             else:
-                self.fail("excess ava's")
+                self.fail('excess ava\'s')
             i += 1
 
         self.assertEqual(list(rdn), [cn_ava, ou_ava])
@@ -157,13 +170,8 @@ class TestCertName(unittest.TestCase):
 
         self.assertEqual(rdn['2.5.4.3'], [cn_ava])
 
-        self.assertEqual(rdn.has_key('cn'), True)
         self.assertEqual('cn' in rdn, True)
-
-        self.assertEqual(rdn.has_key('2.5.4.3'), True)
         self.assertEqual('2.5.4.3' in rdn, True)
-
-        self.assertEqual(rdn.has_key('st'), False)
         self.assertEqual('st' in rdn, False)
 
         self.assertEqual(list(rdn), [cn_ava, ou_ava])
@@ -178,13 +186,13 @@ class TestCertName(unittest.TestCase):
 
         try:
             rdn['st']
-            self.fail("expected KeyError for 'st'")
+            self.fail('expected KeyError for "st"')
         except KeyError:
             pass
 
         try:
             rdn['junk']
-            self.fail("expected KeyError for 'junk'")
+            self.fail('expected KeyError for "junk"')
         except KeyError:
             pass
 
@@ -223,11 +231,15 @@ class TestCertName(unittest.TestCase):
             elif i == 5:
                 self.assertEqual(rdn, cn_rdn)
             else:
-                self.fail("excess rdn's")
+                self.fail('excess rdn\'s')
             i += 1
 
-        self.assertEqual(list(name), [c_rdn, st_rdn, l_rdn, o_rdn, ou_rdn, cn_rdn])
-        self.assertEqual(name[:], [c_rdn, st_rdn, l_rdn, o_rdn, ou_rdn, cn_rdn])
+        self.assertEqual(
+            list(name), [c_rdn, st_rdn, l_rdn, o_rdn, ou_rdn, cn_rdn]
+        )
+        self.assertEqual(
+            name[:], [c_rdn, st_rdn, l_rdn, o_rdn, ou_rdn, cn_rdn]
+        )
 
         self.assertEqual(name['c'], [c_rdn])
         self.assertEqual(name['st'], [st_rdn])
@@ -270,39 +282,48 @@ class TestCertName(unittest.TestCase):
         self.assertEqual(name[1], ou_rdn)
         self.assertEqual(name['cn'], [cn_rdn])
         self.assertEqual(name['ou'], [ou_rdn])
-        self.assertEqual(str(name), 'OU=%s,CN=%s' % (self.ou_name, self.cn_name))
+        self.assertEqual(
+            str(name), 'OU=%s,CN=%s' % (self.ou_name, self.cn_name)
+        )
 
         name = nss.DN(cn_rdn, ou_rdn)
         self.assertEqual(name[0], cn_rdn)
         self.assertEqual(name[1], ou_rdn)
         self.assertEqual(name['cn'], [cn_rdn])
         self.assertEqual(name['ou'], [ou_rdn])
-        self.assertEqual(str(name), 'OU=%s,CN=%s' % (self.ou_name, self.cn_name))
+        self.assertEqual(
+            str(name), 'OU=%s,CN=%s' % (self.ou_name, self.cn_name)
+        )
 
-        self.assertEqual(name.has_key('cn'), True)
         self.assertEqual('cn' in name, True)
-
-        self.assertEqual(name.has_key('ou'), True)
         self.assertEqual('ou' in name, True)
-
-        self.assertEqual(name.has_key('st'), False)
         self.assertEqual('st' in name, False)
 
     def test_oid(self):
         self.assertEqual(nss.oid_str('2.5.4.3'), 'X520 Common Name')
-        self.assertEqual(nss.oid_str(nss.SEC_OID_AVA_COMMON_NAME), 'X520 Common Name')
-        self.assertEqual(nss.oid_str('SEC_OID_AVA_COMMON_NAME'), 'X520 Common Name')
+        self.assertEqual(
+            nss.oid_str(nss.SEC_OID_AVA_COMMON_NAME), 'X520 Common Name'
+        )
+        self.assertEqual(
+            nss.oid_str('SEC_OID_AVA_COMMON_NAME'), 'X520 Common Name'
+        )
         self.assertEqual(nss.oid_str('AVA_COMMON_NAME'), 'X520 Common Name')
         self.assertEqual(nss.oid_str('cn'), 'X520 Common Name')
 
-        self.assertEqual(nss.oid_tag_name('2.5.4.3'), 'SEC_OID_AVA_COMMON_NAME')
         self.assertEqual(
-            nss.oid_tag_name(nss.SEC_OID_AVA_COMMON_NAME), 'SEC_OID_AVA_COMMON_NAME'
+            nss.oid_tag_name('2.5.4.3'), 'SEC_OID_AVA_COMMON_NAME'
         )
         self.assertEqual(
-            nss.oid_tag_name('SEC_OID_AVA_COMMON_NAME'), 'SEC_OID_AVA_COMMON_NAME'
+            nss.oid_tag_name(nss.SEC_OID_AVA_COMMON_NAME),
+            'SEC_OID_AVA_COMMON_NAME',
         )
-        self.assertEqual(nss.oid_tag_name('AVA_COMMON_NAME'), 'SEC_OID_AVA_COMMON_NAME')
+        self.assertEqual(
+            nss.oid_tag_name('SEC_OID_AVA_COMMON_NAME'),
+            'SEC_OID_AVA_COMMON_NAME',
+        )
+        self.assertEqual(
+            nss.oid_tag_name('AVA_COMMON_NAME'), 'SEC_OID_AVA_COMMON_NAME'
+        )
         self.assertEqual(nss.oid_tag_name('cn'), 'SEC_OID_AVA_COMMON_NAME')
 
         self.assertEqual(nss.oid_dotted_decimal('2.5.4.3'), 'OID.2.5.4.3')
@@ -312,17 +333,22 @@ class TestCertName(unittest.TestCase):
         self.assertEqual(
             nss.oid_dotted_decimal('SEC_OID_AVA_COMMON_NAME'), 'OID.2.5.4.3'
         )
-        self.assertEqual(nss.oid_dotted_decimal('AVA_COMMON_NAME'), 'OID.2.5.4.3')
+        self.assertEqual(
+            nss.oid_dotted_decimal('AVA_COMMON_NAME'), 'OID.2.5.4.3'
+        )
         self.assertEqual(nss.oid_dotted_decimal('cn'), 'OID.2.5.4.3')
 
         self.assertEqual(nss.oid_tag('2.5.4.3'), nss.SEC_OID_AVA_COMMON_NAME)
         self.assertEqual(
-            nss.oid_tag(nss.SEC_OID_AVA_COMMON_NAME), nss.SEC_OID_AVA_COMMON_NAME
+            nss.oid_tag(nss.SEC_OID_AVA_COMMON_NAME),
+            nss.SEC_OID_AVA_COMMON_NAME,
         )
         self.assertEqual(
             nss.oid_tag('SEC_OID_AVA_COMMON_NAME'), nss.SEC_OID_AVA_COMMON_NAME
         )
-        self.assertEqual(nss.oid_tag('AVA_COMMON_NAME'), nss.SEC_OID_AVA_COMMON_NAME)
+        self.assertEqual(
+            nss.oid_tag('AVA_COMMON_NAME'), nss.SEC_OID_AVA_COMMON_NAME
+        )
         self.assertEqual(nss.oid_tag('cn'), nss.SEC_OID_AVA_COMMON_NAME)
 
     def test_multi_value(self):

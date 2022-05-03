@@ -23,12 +23,12 @@ class TestDigest(unittest.TestCase):
 
         if verbose:
             print(
-                'running test %s: nss_digest_func=%s hash_oid=%s in_filename=%s'
+                "testing %s: nss_digest_func=%s hash_oid=%s in_filename=%s"
                 % (name, nss_digest_func.__name__, hash_oid_name, in_filename)
             )
 
         # read binary data in from the file
-        with open(in_filename, "rb") as f:
+        with open(in_filename, 'rb') as f:
             ref_data = f.read()
 
         # Run the system hash function to get a reference result.
@@ -44,15 +44,20 @@ class TestDigest(unittest.TestCase):
         # We want to read the reference result from the subprocess as text
         # not binary, thus universal_newlines must be True.
         proc = subprocess.Popen(
-            [ref_cmd, in_filename], stdout=subprocess.PIPE, universal_newlines=True
+            [ref_cmd, in_filename],
+            stdout=subprocess.PIPE,
+            universal_newlines=True,
         )
         stdout, stderr = proc.communicate()
         reference_digest = stdout.split()[0]
         if verbose:
             print('reference_digest\n%s' % (reference_digest))
 
-        # Run the test with convenience digest function (e.g. nss.sha256_digest, etc.).
-        test_digest = nss.data_to_hex(nss_digest_func(ref_data), separator=None)
+        # Run the test with convenience digest function
+        # (e.g. nss.sha256_digest, etc.).
+        test_digest = nss.data_to_hex(
+            nss_digest_func(ref_data), separator=None
+        )
         if verbose:
             print('nss %s\n%s' % (nss_digest_func.__name__, test_digest))
 
@@ -63,8 +68,11 @@ class TestDigest(unittest.TestCase):
             % (nss_digest_func.__name__, reference_digest, test_digest),
         )
 
-        # Run the test using the generic hash_buf function specifying the hash algorithm.
-        test_digest = nss.data_to_hex(nss.hash_buf(hash_oid, ref_data), separator=None)
+        # Run the test using the generic hash_buf function specifying the hash
+        # algorithm.
+        test_digest = nss.data_to_hex(
+            nss.hash_buf(hash_oid, ref_data), separator=None
+        )
         if verbose:
             print('nss.hash_buf %s\n%s' % (hash_oid_name, test_digest))
 
@@ -75,7 +83,8 @@ class TestDigest(unittest.TestCase):
             % (hash_oid_name, reference_digest, test_digest),
         )
 
-        # Run the test using the lowest level hashing functions by specifying the hash algorithm.
+        # Run the test using the lowest level hashing functions by specifying
+        # the hash algorithm.
         # The entire input data is supplied all at once in a single call.
         context = nss.create_digest_context(hash_oid)
         context.digest_begin()
@@ -91,7 +100,8 @@ class TestDigest(unittest.TestCase):
             % (hash_oid_name, reference_digest, test_digest),
         )
 
-        # Run the test using the lowest level hashing functions by specifying the hash algorithm
+        # Run the test using the lowest level hashing functions by specifying
+        # the hash algorithm
         # and feeding 'chunks' of data one at a time to be consumed.
         with open(in_filename, 'rb') as in_file:
             context = nss.create_digest_context(hash_oid)
@@ -104,12 +114,15 @@ class TestDigest(unittest.TestCase):
 
         test_digest = nss.data_to_hex(context.digest_final(), separator=None)
         if verbose:
-            print('chunked nss.digest_context %s\n%s' % (hash_oid_name, test_digest))
+            print(
+                'chunked nss.digest_context %s\n%s'
+                % (hash_oid_name, test_digest)
+            )
 
         self.assertEqual(
             test_digest,
             reference_digest,
-            msg='chunked nss.digest_context %s test failed reference=%s test=%s'
+            msg="chunked nss.digest_context %s failed reference=%s test=%s"
             % (hash_oid_name, reference_digest, test_digest),
         )
 
@@ -120,10 +133,14 @@ class TestDigest(unittest.TestCase):
         self.do_test('sha1', 'sha1sum', nss.sha1_digest, nss.SEC_OID_SHA1)
 
     def test_sha256(self):
-        self.do_test('sha256', 'sha256sum', nss.sha256_digest, nss.SEC_OID_SHA256)
+        self.do_test(
+            'sha256', 'sha256sum', nss.sha256_digest, nss.SEC_OID_SHA256
+        )
 
     def test_sha512(self):
-        self.do_test('sha512', 'sha512sum', nss.sha512_digest, nss.SEC_OID_SHA512)
+        self.do_test(
+            'sha512', 'sha512sum', nss.sha512_digest, nss.SEC_OID_SHA512
+        )
 
 
 if __name__ == '__main__':

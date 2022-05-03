@@ -1,4 +1,14 @@
-2022-03-21  Marcin Cieślak  <saper@saper.info> 2.0.0
+2022-05-01 Jesse P. Johnson <jpj6652@gmail.com> 2.0.0.dev2
+
+  * Fix tests to ensure failures reported correctly in pipeline.
+  * Fix linting errors in tests
+  * Fix paths on debian multiarch systems.
+
+2022-05-01 Jesse P. Johnson <jpj6652@gmail.com> 2.0.0.dev1
+
+  * Added CI pipeine for manylinux builds.
+
+2022-03-21  Marcin Cieślak  <saper@saper.info> 2.0.0.dev0
 
   * The following constants were added:
 
@@ -14,7 +24,7 @@
 
   * Added bindep to validate environment requirements.
 
-  * Updated build for universal wheel packages.  
+  * Updated build for universal wheel packages.
 
   * Normalized project paths and contents.
 
@@ -49,17 +59,17 @@
     - nss.get_all_tokens
 
   * The following constants were added:
-	
+
     - ssl.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256
     - ssl.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256
     - ssl.TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256
     - ssl.TLS_ECDHE_PSK_WITH_CHACHA20_POLY1305_SHA256
     - ssl.TLS_DHE_PSK_WITH_CHACHA20_POLY1305_SHA256
-	
+
 2015-09-03  John Dennis  <jdennis@redhat.com> 1.0.0beta1
   The primary enhancement in this version is support for Python3
   Single code base supports both Py2 (minimum version 2.7) and Py3
-  
+
       When built for Py2:
        - text will be a Unicode object
        - binary data will be a str object
@@ -71,7 +81,7 @@
 
       All pure Python tests and examples have been ported to Py3
       syntax but should continue to run under Py2.
-	
+
   * The following class methods were added:
 
     - PK11Slot.check_security_officer_passwd
@@ -102,7 +112,7 @@
     - nss.SecItem.format_lines
     - nss.SecItem.format
 
-	* The following files were added:
+* The following files were added:
 
     - doc/examples/pbkdf2_example.py
 

@@ -73,7 +73,7 @@ jobs:
     strategy:
       matrix:
         python:
-          - {os: ubuntu-latest, version: '3.6', pyver: cp36}
+          # - {os: ubuntu-latest, version: '3.6', pyver: cp36}
           - {os: ubuntu-latest, version: '3.7', pyver: cp37}
           - {os: ubuntu-latest, version: '3.8', pyver: cp38}
           - {os: ubuntu-latest, version: '3.9', pyver: cp39}
@@ -82,27 +82,31 @@ jobs:
       python: python${{ matrix.python.version }}
     steps:
       - uses: actions/checkout@v3
-      - name: Install base dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libnss3 libnss3-tools libnspr4
-      - name: Set up Python ${{ matrix.python.version }}
-        uses: actions/setup-python@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
         with:
-          python-version: ${{ matrix.python.version }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Download versioned files
         uses: actions/download-artifact@v3
         with:
           name: linux-wheel
-      - name: Install dependencies
+      - name: Run build
         run: |
-          PACKAGE=$(basename python_nss-*${{ matrix.python.pyver }}*manylinux*.whl)
-          # ${{ env.python }} -m pip install -r requirements.txt
-          ${{ env.python }} -m pip install "${PACKAGE}"
-      # - name: Validate test environment
-      #   run: ${{ env.python }} -m bindep --file bindep.txt runtime
-      - name: Run test suite
-        run: tests/run_tests.py
+          docker run \
+            --rm \
+            --volume ${{ github.workspace }}:/io:rw \
+            --workdir /io \
+            python:${{ version }}-buster \
+            bash -exc "yum update-minimal --security -y \
+              && yum install -y libnspr4 libnss3 libnss3-tools \
+              && ${{ env.python }} -m venv .env \
+              && source .env/bin/activate \
+              && ${{ env.python }} -m pip install -r dev-requirements.txt \
+              && ${{ env.python }} -m pip install \
+                $(basename python_nss-*${{ matrix.python.pyver }}*.whl) \
+              && tests/run_tests.py \
+              && deactivate"
   publish:
     runs-on: ubuntu-latest
     needs: [build, test]

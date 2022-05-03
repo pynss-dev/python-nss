@@ -108,7 +108,7 @@ jobs:
               && source .env/bin/activate \
               && ls \
               && PACKAGE=$(basename python_nss-*${{ matrix.python.pyver }}*manylinux*.whl) \
-              && ${{ env.python }} -m pip install \"${PACKAGE}\" \
+                ${{ env.python }} -m pip install \"${PACKAGE}\" \
               && tests/run_tests.py \
               && deactivate"
   publish:

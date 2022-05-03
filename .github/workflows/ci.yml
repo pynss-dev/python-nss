@@ -103,7 +103,7 @@ jobs:
             --workdir /test \
             quay.io/centos/centos:stream8 \
             bash -exc "yum update-minimal --security -y \
-              && yum install -y nspr nss nss-tools \
+              && yum install -y ${{ env.python }} nspr nss nss-tools \
               && ${{ env.python }} -m venv .env \
               && source .env/bin/activate \
               && ${{ env.python }} -m pip install \

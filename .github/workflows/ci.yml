@@ -60,7 +60,7 @@ jobs:
               && pip install -r requirements.txt \
               && python setup.py bdist_wheel \
               && auditwheel repair \
-                dist/python_nss-*${{ matrix.python.pyver }}*-linux_*.whl \
+                dist/python_nss-*${{ matrix.python.pyver }}*-linux*.whl \
               && deactivate"
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
@@ -95,12 +95,12 @@ jobs:
         run: |
           docker run \
             --rm \
+            --env LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu/nss:$LD_LIBRARY_PATH" \
             --volume ${{ github.workspace }}:/io:rw \
             --workdir /io \
             python:${{ matrix.python.version }}-buster \
             bash -exc "apt-get update \
               && apt install -y libnspr4 libnss3 libnss3-tools \
-              && ldconfig -n /usr/lib/x86_64-linux-gnu/nss \
               && ls /usr/lib/x86_64-linux-gnu/nss \
               && ${{ env.python }} -m venv .env \
               && source .env/bin/activate \

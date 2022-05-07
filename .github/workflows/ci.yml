@@ -95,7 +95,7 @@ jobs:
         run: |
           docker run \
             --rm \
-            --env [LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu/nss:$LD_LIBRARY_PATH"] \
+            --env LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu/nss \
             --volume ${{ github.workspace }}:/io:rw \
             --workdir /io \
             python:${{ matrix.python.version }}-buster \

@@ -35,7 +35,7 @@ def run_tests():
     suite.addTests(loader.loadTestsFromModule(test_misc))
     suite.addTests(loader.loadTestsFromModule(test_ocsp))
     suite.addTests(loader.loadTestsFromModule(test_cert_request))
-    suite.addTests(loader.loadTestsFromModule(test_client_server))
+    # suite.addTests(loader.loadTestsFromModule(test_client_server))
 
     result = runner.run(suite)
     return not result.wasSuccessful()

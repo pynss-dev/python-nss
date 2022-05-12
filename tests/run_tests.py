@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Initialize unittest."""
 
 from __future__ import print_function

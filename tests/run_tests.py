@@ -21,6 +21,7 @@ def run_tests():
     import test_misc
     import test_ocsp
     import test_pkcs12
+
     # import test_client_server
 
     setup_certs.setup_certs([])

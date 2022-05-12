@@ -1,6 +1,6 @@
 import os
-import sys
 import platform
+import sys
 
 
 def get_build_dir():

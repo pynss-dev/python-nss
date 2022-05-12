@@ -17,11 +17,11 @@ def run_tests():
     import test_cert_components
     import test_cert_request
     import test_cipher
-    import test_client_server
     import test_digest
     import test_misc
     import test_ocsp
     import test_pkcs12
+    # import test_client_server
 
     setup_certs.setup_certs([])
 
@@ -35,6 +35,7 @@ def run_tests():
     suite.addTests(loader.loadTestsFromModule(test_misc))
     suite.addTests(loader.loadTestsFromModule(test_ocsp))
     suite.addTests(loader.loadTestsFromModule(test_cert_request))
+    # XXX: causing segfault on exit with ubuntu
     # suite.addTests(loader.loadTestsFromModule(test_client_server))
 
     result = runner.run(suite)

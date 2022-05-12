@@ -8,7 +8,7 @@ import os
 import sys
 import unittest
 
-from util import get_build_dir
+from utils import get_build_dir
 
 
 def run_tests():

@@ -1,6 +1,6 @@
 import os
 import sys
-from distutils.util import get_platform
+import platform
 
 
 def get_build_dir():
@@ -34,7 +34,7 @@ def get_build_dir():
             # Found, return the path contentated with the architecture
             # specific build directory
             platform_specifier = "lib.%s-%s" % (
-                get_platform(),
+                f"{platform.system().lower()}-{platform.machine()}",
                 sys.version[0:3],
             )
             return os.path.join(build_path, platform_specifier)

@@ -15,7 +15,7 @@ from setuptools._distutils.util import change_root, subst_vars
 from sphinx.setup_command import BuildDoc as SphinxBuildDoc
 
 name = 'python-nss'
-version = '2.0.0.dev2'
+version = '2.0.0.dev3'
 release = version
 
 doc_manifest = [
@@ -389,7 +389,7 @@ def main(argv):
             'src/py_nspr_error.h',
             'src/py_nss.h',
         ],
-        libraries=['nspr4', 'ssl3', 'nss3', 'smime3'],
+        libraries=['nspr4', 'ssl3', 'nss3', 'smime3', 'softokn3'],
         extra_compile_args=extra_compile_args,
     )
 

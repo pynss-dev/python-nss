@@ -100,6 +100,7 @@ jobs:
             --workdir /io \
             python:${{ matrix.python.version }}-buster \
             bash -exc "apt-get update \
+              && apt install -y libnspr4 libnss3 libnss3-tools \
               && ${{ env.python }} -m venv .env \
               && source .env/bin/activate \
               && ${{ env.python }} -m pip install --upgrade pip \

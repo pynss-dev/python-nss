@@ -389,7 +389,7 @@ def main(argv):
             'src/py_nspr_error.h',
             'src/py_nss.h',
         ],
-        libraries=['nspr4', 'ssl3', 'nss3', 'smime3', 'softokn3'],
+        libraries=['nspr4', 'ssl3', 'nss3', 'smime3', 'nssutil3'],
         extra_compile_args=extra_compile_args,
     )
 

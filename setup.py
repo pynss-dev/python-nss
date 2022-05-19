@@ -272,7 +272,6 @@ class InstallDoc(Command):
         This process is repeated for each install spec. The src_root and
         dst_root are also subject to variable substitution.
 
-
         Examples:
 
         Copy all text files in build/doc to doc:
@@ -324,7 +323,6 @@ class InstallDoc(Command):
 
 
 def main(argv):
-
     with open('README.md') as f:
         long_description = f.read()
 
@@ -389,7 +387,15 @@ def main(argv):
             'src/py_nspr_error.h',
             'src/py_nss.h',
         ],
-        libraries=['nspr4', 'ssl3', 'nss3', 'smime3', 'nssutil3'],
+        libraries=[
+            'nspr4',
+            'ssl3',
+            'nss3',
+            'smime3',
+            'nssutil3',
+            'plc4',
+            'plds4',
+        ],
         extra_compile_args=extra_compile_args,
     )
 
@@ -404,7 +410,7 @@ def main(argv):
             'src/py_ssl.h',
             'src/py_nss.h',
         ],
-        libraries=['nspr4', 'ssl3'],
+        libraries=['nspr4', 'ssl3', 'nss3', 'nssutil3', 'plc4', 'plds4'],
         extra_compile_args=extra_compile_args,
     )
 

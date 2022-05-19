@@ -48,7 +48,10 @@ jobs:
             --volume ${{ github.workspace }}:/io:rw \
             --workdir /io \
             quay.io/pypa/manylinux2014_x86_64:latest \
-            bash -exc "yum update-minimal --security -y \
+            bash -exc "yum-config-manager \
+                 --save \
+                 --setopt=epel/x86_64.skip_if_unavailable=true \
+              && yum update-minimal --security -y \
               && yum install -y \
                 gcc \
                 nss \
